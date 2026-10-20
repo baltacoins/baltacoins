@@ -1,0 +1,12 @@
+{
+  "appId": "com.espressoblok.app",
+  "appName": "Espresso Blok",
+  "webDir": "www",
+  "backgroundColor": "#F6EEE1",
+  "android": {
+    "allowMixedContent": false
+  },
+  "ios": {
+    "contentInset": "automatic"
+  }
+}

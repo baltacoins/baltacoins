@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#C0632B">
+<title>Espresso Blok Oyunu</title>
+<style>
+:root{
+  --bg:#F6EEE1; --bg-deep:#ECE0C8; --surface:#FFFFFF; --ink:#2A1B12; --muted:#8B7360;
+  --accent:#C0632B; --crema:#C9972E; --line:#E6D7C1; --bad:#B23A2E;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1C140F; --bg-deep:#17100B; --surface:#2A1E16; --ink:#F1E6D8; --muted:#B59C86;
+    --accent:#E08A52; --crema:#E0B64E; --line:#4A3626; --bad:#E07363; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1C140F; --bg-deep:#17100B; --surface:#2A1E16; --ink:#F1E6D8; --muted:#B59C86;
+  --accent:#E08A52; --crema:#E0B64E; --line:#4A3626; --bad:#E07363; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:'Public Sans',system-ui,sans-serif;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+.mono{font-family:'IBM Plex Mono',monospace}
+.shell{max-width:900px;margin:0 auto;padding-block:26px 60px;display:flex;flex-direction:column;gap:20px}
+
+/* ---------- topbar / brandmark ---------- */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brandmark{display:flex;align-items:center;gap:10px}
+.mark{width:30px;height:30px;border-radius:8px;background:var(--ink);position:relative;flex:0 0 auto}
+.mark span{position:absolute;left:6px;right:6px;height:4px;border-radius:2px}
+.mark span:first-child{top:8px;background:var(--accent)}
+.mark span:last-child{top:17px;background:var(--bg)}
+.brand-name{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:19px}
+.scoreboard{display:flex;align-items:baseline;gap:5px;font-family:'Fraunces',Georgia,serif}
+.scoreboard .num{font-size:26px;font-weight:700}
+.scoreboard .sep{font-size:16px;color:var(--muted)}
+.scoreboard .den{font-size:16px;color:var(--muted)}
+.scoreboard .lbl{font-family:'Public Sans',sans-serif;font-size:11px;color:var(--muted);margin-left:4px;align-self:center}
+.comboBadge{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:12px;color:var(--crema);
+  background:rgba(201,151,46,.14);padding:4px 10px;border-radius:14px;margin-left:6px;align-self:center;white-space:nowrap}
+.comboToast{position:absolute;top:12px;left:50%;transform:translate(-50%,-8px);background:var(--ink);color:var(--bg);
+  font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:13px;padding:8px 18px;border-radius:20px;
+  opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:5;white-space:nowrap}
+.comboToast.show{opacity:1;transform:translate(-50%,0)}
+.speedMsg{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted)}
+.speedMsg.record{color:var(--crema);font-weight:600}
+
+/* ---------- level bar ---------- */
+.levelBar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.levelName{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:14px;color:var(--accent);white-space:nowrap}
+.levelTrack{flex:1;min-width:80px;height:6px;border-radius:4px;background:var(--line);overflow:hidden}
+.levelFill{height:100%;background:var(--crema);border-radius:4px;transition:width .3s ease-out;width:0}
+.levelNext{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);white-space:nowrap}
+.levelUpMsg{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:13px;color:var(--crema);
+  background:rgba(201,151,46,.12);border-radius:8px;padding:8px 12px;margin-top:2px}
+
+/* ---------- tabs ---------- */
+.tabbar{display:flex;gap:18px;border-bottom:1px solid var(--line)}
+.tabbtn{font-family:'Public Sans',sans-serif;font-weight:600;font-size:13px;background:none;border:none;
+  padding:9px 2px;cursor:pointer;color:var(--muted);position:relative}
+.tabbtn.active{color:var(--ink)}
+.tabbtn.active::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--accent);border-radius:1px}
+
+.panel{display:none;flex-direction:column;gap:20px}
+.panel.active{display:flex}
+
+/* ---------- order ticket ---------- */
+.ticket{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:6px;
+  padding:18px 26px 20px;box-shadow:0 8px 20px rgba(42,27,18,.1);transform:rotate(-.35deg)}
+.ticket::before,.ticket::after{content:"";position:absolute;width:15px;height:15px;border-radius:50%;
+  background:var(--bg);top:50%;transform:translateY(-50%);border:1px solid var(--line)}
+.ticket::before{left:-8px}
+.ticket::after{right:-8px}
+.ticket-head{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:10.5px;
+  color:var(--muted);letter-spacing:.02em;margin-bottom:8px}
+.ticket-name{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:24px;text-wrap:balance;display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.tempBadge{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:10px;letter-spacing:.04em;padding:3px 8px;border-radius:20px;white-space:nowrap}
+.tempBadge.hot{background:rgba(192,99,43,.15);color:var(--accent)}
+.tempBadge.cold{background:rgba(70,130,180,.18);color:#2E6A8C}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tempBadge.cold{color:#8FD0EE}}
+:root[data-theme="dark"] .tempBadge.cold{color:#8FD0EE}
+.ticket-progress{display:flex;align-items:center;gap:7px;margin-top:8px}
+.ticket-progress .dot{width:9px;height:9px;border-radius:50%;background:var(--line)}
+.ticket-progress .dot.filled{background:var(--accent)}
+.ticket-progress .cap{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted);margin-left:4px}
+.ticket-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;align-items:center}
+.ticket-actions .spacer{flex:1}
+
+.btn{
+  font-family:'Public Sans',sans-serif;font-weight:600;font-size:13px;border:none;border-radius:9px;
+  padding:10px 16px;cursor:pointer;color:#fff;background:var(--accent);transition:filter .12s,transform .08s;
+}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.btn.small{padding:7px 11px;font-size:11.5px}
+
+/* ---------- workspace (shared: game + custom) ---------- */
+.workspace{display:grid;grid-template-columns:1fr 260px;gap:22px;align-items:start}
+@media (max-width:680px){.workspace{grid-template-columns:1fr}}
+
+.tower-box{position:relative;background:
+    radial-gradient(circle at 50% 100%, rgba(192,99,43,.08), transparent 62%), var(--surface);
+  border:1px solid var(--line);border-radius:20px;padding:26px;min-height:300px;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-end;transition:box-shadow .2s}
+.tower-box.shake{animation:shake .32s}
+.tower-box.dragover{box-shadow:0 0 0 3px var(--accent) inset}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+
+.stackRow{display:flex;align-items:flex-end;justify-content:center;gap:28px;width:100%}
+.tower{display:flex;flex-direction:column-reverse;align-items:center;width:min(100%,200px)}
+.block{
+  width:100%;min-height:44px;display:flex;align-items:center;justify-content:center;text-align:center;
+  padding:9px 12px;font-size:11.5px;font-weight:700;line-height:1.3;position:relative;
+  background-image:linear-gradient(180deg, rgba(255,255,255,.22), rgba(0,0,0,.1));
+  background-blend-mode:overlay;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.3), inset 0 -3px 6px rgba(0,0,0,.14), 0 5px 12px rgba(20,12,6,.16);
+  animation:drop .24s cubic-bezier(.3,1.4,.6,1);
+}
+@keyframes drop{from{transform:translateY(-16px) scale(.97);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.block:not(:first-child){border-top:1px solid rgba(255,255,255,.22)}
+.pin{width:14px;height:14px;border-radius:50%;background:conic-gradient(var(--accent) 0deg 180deg,#1A110B 180deg 360deg);
+  border:1.5px solid #1A110B;margin-bottom:-2px;position:relative;z-index:2}
+.pin.pulse::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--accent);
+  animation:pinpulse .5s ease-out}
+@keyframes pinpulse{from{opacity:.9;transform:scale(.6)}to{opacity:0;transform:scale(1.9)}}
+.empty-hint{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);text-align:center;max-width:190px;line-height:1.6}
+
+.cup{position:relative;flex:0 0 auto;height:150px;transition:height .25s ease-out,width .25s ease-out}
+.cupGlass{position:absolute;inset:0;border:2px solid var(--ink);border-top:none;
+  overflow:hidden;background:rgba(255,255,255,.1);transition:clip-path .25s ease-out}
+.cupFill{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column-reverse;
+  transition:height .35s ease-out;height:0}
+.cupLayer{width:100%}
+.cupRim{position:absolute;left:-3px;right:-3px;top:-5px;height:6px;border-radius:3px;
+  background:var(--surface);border:2px solid var(--ink)}
+.cupHandle{position:absolute;right:-15px;top:32%;width:18px;height:32px;border:4px solid var(--ink);
+  border-left:none;border-radius:0 13px 13px 0}
+.cupLabel{text-align:center;margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted)}
+
+.cup--small{width:40px}
+.cup--medium{width:50px}
+.cup--large{width:63px}
+.cup--xlarge{width:76px}
+
+/* vessel shapes — real-world cup silhouettes, independent of size scale above */
+.cup--demitasse .cupGlass{clip-path:polygon(5% 0,95% 0,86% 100%,14% 100%)}
+.cup--demitasse .cupHandle{top:33%;height:17px;width:10px}
+.cup--cup .cupGlass{clip-path:polygon(2% 0,98% 0,88% 100%,12% 100%)}
+.cup--cup .cupHandle{top:30%;height:26px;width:14px}
+.cup--mug .cupGlass{clip-path:polygon(0 0,100% 0,95% 100%,5% 100%)}
+.cup--mug .cupHandle{top:34%;height:36px;width:18px}
+.cup--glass .cupGlass{clip-path:polygon(12% 0,88% 0,86% 100%,14% 100%)}
+.cup--glass .cupHandle{display:none}
+.cup--glassh .cupGlass{clip-path:polygon(12% 0,88% 0,86% 100%,14% 100%)}
+.cup--glassh .cupHandle{top:32%;height:24px;width:12px}
+.cup--tumbler .cupGlass{clip-path:polygon(7% 0,93% 0,90% 100%,10% 100%)}
+.cup--tumbler .cupHandle{display:none}
+.cup--iced .cupGlass{box-shadow:inset 0 0 0 999px rgba(190,230,245,.12)}
+.cup--iced .cupFill::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.55) 0 18%, transparent 19% 48%, rgba(255,255,255,.4) 49% 60%, transparent 61% 100%) 0 0/13px 22px,
+    linear-gradient(-25deg, transparent 0 55%, rgba(255,255,255,.3) 56% 68%, transparent 69% 100%) 6px 11px/18px 26px;
+  opacity:.65; mix-blend-mode:screen}
+
+.success{display:none;flex-direction:column;align-items:center;gap:10px;text-align:center;position:relative;padding-top:6px}
+.success.show{display:flex}
+.success .steamWrap{position:relative;width:60px;height:22px}
+.success .steam{position:absolute;bottom:0;width:5px;height:16px;border-radius:3px;
+  background:linear-gradient(180deg, rgba(201,151,46,0), var(--crema));opacity:0;
+  animation:steam 2.6s ease-in-out infinite}
+.success .steam:nth-child(1){left:14px;animation-delay:0s}
+.success .steam:nth-child(2){left:28px;animation-delay:.5s}
+.success .steam:nth-child(3){left:42px;animation-delay:1s}
+@keyframes steam{0%{opacity:0;transform:translateY(0) scaleX(1)}25%{opacity:.55}100%{opacity:0;transform:translateY(-22px) scaleX(1.6)}}
+.success .check{font-size:30px;color:var(--crema);line-height:1}
+.success .label{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:18px}
+.success.revealed .check{color:var(--muted)}
+.success.revealed .steamWrap{visibility:hidden}
+.success.iced .steamWrap{visibility:hidden}
+.success.iced .check{color:#2E6A8C}
+
+.compList{display:flex;flex-direction:column;gap:6px;font-size:10.5px;color:var(--muted);text-align:left;width:100%;
+  margin-top:8px;border-top:1px dashed var(--line);padding-top:10px}
+.compList .ct{display:flex;justify-content:space-between;gap:8px}
+.compList .ct b{color:var(--ink);font-weight:600}
+.totals{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted);margin-top:4px;text-align:center}
+
+/* ---------- palette ---------- */
+.palette-wrap{display:flex;flex-direction:column;gap:16px}
+.palette-group-title{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.03em;color:var(--muted);margin-bottom:7px}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+@media (max-width:680px){.chips{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:420px){.chips{grid-template-columns:1fr 1fr}}
+
+.ing{
+  border:none;border-radius:9px;padding:9px 10px 9px 20px;text-align:left;font-weight:700;font-size:11px;cursor:grab;
+  display:flex;flex-direction:column;gap:2px;transition:opacity .15s,box-shadow .15s;touch-action:none;user-select:none;
+  position:relative;box-shadow:0 2px 5px rgba(20,12,6,.14);
+}
+.ing::before{content:"";position:absolute;left:7px;top:50%;transform:translateY(-50%);width:4px;height:4px;
+  border-radius:50%;background:currentColor;opacity:.55;box-shadow:0 6px 0 currentColor,0 -6px 0 currentColor}
+.ing:active{cursor:grabbing}
+.ing span{font-weight:500;font-size:9px;opacity:.85;font-family:'IBM Plex Mono',monospace}
+
+/* ---------- barista note (fact panel) ---------- */
+.factPanel{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:4px;
+  padding:13px 16px 18px;font-size:11.5px;line-height:1.55;color:var(--ink);display:none;margin-bottom:10px}
+.factPanel.show{display:block;animation:fadeIn .25s ease-out}
+.factPanel::after{content:"";position:absolute;left:0;right:0;bottom:-7px;height:7px;
+  background:
+    linear-gradient(135deg, var(--bg) 25%, transparent 25%) 0 0/7px 7px,
+    linear-gradient(225deg, var(--bg) 25%, transparent 25%) 0 0/7px 7px;
+  background-color:var(--surface)}
+.factPanel b{display:block;font-size:10px;margin-bottom:4px;color:var(--accent);font-family:'IBM Plex Mono',monospace;letter-spacing:.02em}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ---------- recipe book ---------- */
+.bookIntro{font-size:12px;color:var(--muted);line-height:1.6}
+.bookFilters{display:flex;gap:8px;flex-wrap:wrap}
+.bookFilterBtn{font-family:'Public Sans',sans-serif;font-weight:600;font-size:11.5px;border:1px solid var(--line);
+  background:var(--surface);color:var(--muted);border-radius:20px;padding:7px 14px;cursor:pointer}
+.bookFilterBtn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.bookList{display:flex;flex-direction:column;gap:10px}
+.bookTierHead{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:15px;color:var(--ink);
+  margin-top:10px;padding-bottom:4px;border-bottom:2px solid var(--accent);display:inline-block}
+.bookTierHead:first-child{margin-top:0}
+.bookTierHead.locked{color:var(--muted);border-bottom-color:var(--line)}
+.bookTierHead .lockNote{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:10px;letter-spacing:.01em}
+.bookItem{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.bookHead{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 16px;
+  cursor:pointer;width:100%;border:none;background:none;text-align:left}
+.bookHead .nm{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:15.5px;color:var(--ink)}
+.bookHead .meta{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--muted);white-space:nowrap;display:flex;align-items:center;gap:6px}
+.bookHead .chev{color:var(--muted);transition:transform .2s;flex:0 0 auto}
+.bookItem.open .chev{transform:rotate(180deg)}
+.bookDetail{display:none;padding:0 16px 14px}
+.bookItem.open .bookDetail{display:block;padding-top:4px;border-top:1px dashed var(--line);margin:0 16px 0;padding-left:0;padding-right:0}
+.bookRow{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:11.5px;padding:7px 0;border-bottom:1px solid var(--line)}
+.bookRow:last-of-type{border-bottom:none}
+.bookRow .sw{width:12px;height:12px;border-radius:4px;flex:0 0 auto;border:1px solid rgba(0,0,0,.15)}
+.bookRow .ord{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--muted);width:16px}
+.bookRow .nm2{font-weight:600;flex:1}
+.bookTotalsLine{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);margin-top:8px}
+.bookSpecLine{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--accent);padding:0 0 7px 24px;margin-top:-5px}
+
+/* ---------- custom builder ---------- */
+.customActions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.nameInput{font-family:'Public Sans',sans-serif;font-size:12.5px;padding:10px 13px;border:1px solid var(--line);
+  border-radius:9px;background:var(--surface);color:var(--ink);flex:1;min-width:150px}
+.nameInput::placeholder{color:var(--muted)}
+.customSummary{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.customSummary .hd{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:16px;margin-bottom:8px}
+.savedWrap{display:flex;flex-direction:column;gap:10px}
+.savedTitle{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.03em;color:var(--muted)}
+.savedItem{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px 15px;
+  display:flex;justify-content:space-between;align-items:center;gap:12px}
+.savedItem .nm{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:14px}
+.savedItem .meta{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--muted);margin-top:2px}
+.savedEmpty{font-size:11.5px;color:var(--muted)}
+
+/* ---------- guess mode ---------- */
+.guessScoreboard{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--muted)}
+.guessOptions{display:flex;flex-direction:column;gap:9px}
+.guessOptBtn{font-family:'Public Sans',sans-serif;font-weight:600;font-size:13px;text-align:left;
+  border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:12px 14px;cursor:pointer}
+.guessOptBtn:hover{border-color:var(--accent)}
+.guessOptBtn.correct{background:rgba(201,151,46,.18);border-color:var(--crema);color:var(--ink)}
+.guessOptBtn.wrong{background:rgba(178,58,46,.12);border-color:var(--bad);color:var(--ink)}
+.guessOptBtn:disabled{cursor:default}
+.guessReveal{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.guessReveal .hd{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:16px;margin-bottom:6px}
+.guessReveal .nextBtnWrap{margin-top:12px}
+
+/* ---------- badges ---------- */
+.badgeGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.badgeGrid{grid-template-columns:1fr}}
+.badgeCard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;
+  display:flex;gap:12px;align-items:flex-start;opacity:1}
+.badgeCard.locked{opacity:.45}
+.badgeCard .icon{font-size:26px;line-height:1;flex:0 0 auto}
+.badgeCard .nm{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:14.5px}
+.badgeCard .desc{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5}
+.badgeToast{position:fixed;top:20px;left:50%;transform:translate(-50%,-14px);background:var(--ink);color:var(--bg);
+  font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:14px;padding:12px 20px;border-radius:14px;
+  opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;z-index:50;white-space:nowrap;
+  box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.badgeToast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- race mode ---------- */
+.raceHud{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 18px}
+.raceTimer{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:30px;color:var(--ink);min-width:70px}
+.raceTimer.low{color:var(--bad);animation:raceTick .5s ease-in-out infinite}
+@keyframes raceTick{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+.raceScoreboard{font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--muted)}
+.raceStartWrap{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;
+  background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:40px 24px}
+.raceStartWrap .big{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:20px}
+.raceStartWrap .sub{font-size:12.5px;color:var(--muted);max-width:320px;line-height:1.6}
+.raceResult{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;
+  background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:36px 24px}
+.raceResult .big{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:26px}
+.raceResult .record{color:var(--crema);font-weight:700;font-family:'IBM Plex Mono',monospace;font-size:12.5px}
+.raceResult .sub{font-size:12.5px;color:var(--muted)}
+
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..800&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<div class="shell">
+
+  <div class="topbar">
+    <div class="brandmark">
+      <div class="mark"><span></span><span></span></div>
+      <div class="brand-name">Espresso Blok</div>
+    </div>
+    <div class="scoreboard">
+      <span class="num" id="scoreVal">0</span><span class="sep">/</span><span class="den" id="totalVal">0</span>
+      <span class="lbl">doğru tarif</span>
+      <span class="comboBadge" id="comboBadge" hidden>🔥 <span id="comboVal">0</span></span>
+    </div>
+  </div>
+
+  <div class="levelBar" id="levelBar">
+    <div class="levelName" id="levelName">Kahveci</div>
+    <div class="levelTrack"><div class="levelFill" id="levelFill"></div></div>
+    <div class="levelNext" id="levelNext"></div>
+  </div>
+
+  <div class="tabbar">
+    <button class="tabbtn active" type="button" data-tab="game">Oyun</button>
+    <button class="tabbtn" type="button" data-tab="book">Tarif Kitabı</button>
+    <button class="tabbtn" type="button" data-tab="guess">Bu Ne?</button>
+    <button class="tabbtn" type="button" data-tab="badges">Rozetler</button>
+    <button class="tabbtn" type="button" data-tab="race">Yarış</button>
+    <button class="tabbtn" type="button" data-tab="custom">Kendi Tarifin</button>
+  </div>
+
+  <!-- ===================== GAME PANEL ===================== -->
+  <div class="panel active" id="panelGame">
+
+    <div class="ticket" id="ticket">
+      <div class="ticket-head">
+        <span id="recipeCounter">SİPARİŞ</span>
+        <span id="recipePoolSize"></span>
+      </div>
+      <div class="ticket-name" id="targetName">—</div>
+      <div class="ticket-progress" id="targetProgress"></div>
+      <div class="ticket-actions">
+        <button class="btn ghost" id="resetBtn" type="button">Sıfırla</button>
+        <button class="btn ghost" id="giveupBtn" type="button">Sonuç</button>
+        <div class="spacer"></div>
+        <button class="btn" id="skipBtn" type="button">Yeni Tarif</button>
+      </div>
+    </div>
+
+    <div class="workspace">
+      <div class="tower-box" id="towerBox">
+        <div class="comboToast" id="comboToast"></div>
+        <div class="success" id="successBox">
+          <div class="steamWrap"><div class="steam"></div><div class="steam"></div><div class="steam"></div></div>
+          <div class="check">✓</div>
+          <div class="label" id="successLabel"></div>
+          <div class="levelUpMsg" id="levelUpMsg" hidden></div>
+          <div class="speedMsg" id="speedMsg"></div>
+          <div class="compList" id="compList"></div>
+          <div class="totals" id="totalsLine"></div>
+          <button class="btn" id="nextBtn">Sıradaki Tarif</button>
+        </div>
+        <div class="stackRow">
+          <div>
+            <div class="cup" id="cupEl">
+              <div class="cupGlass"></div>
+              <div class="cupFill" id="cupFill"></div>
+              <div class="cupRim"></div>
+              <div class="cupHandle"></div>
+            </div>
+            <div class="cupLabel">bardak</div>
+          </div>
+          <div class="tower" id="tower"></div>
+        </div>
+        <div class="empty-hint" id="emptyHint">Parçaları buraya sürükleyip bırak — taban parçadan başla.</div>
+      </div>
+
+      <div class="palette-wrap">
+        <div>
+          <div class="palette-group-title">Espresso Bazlı</div>
+          <div class="chips" id="paletteEspresso"></div>
+        </div>
+        <div>
+          <div class="palette-group-title">Süt &amp; Su</div>
+          <div class="chips" id="paletteMilk"></div>
+        </div>
+        <div>
+          <div class="palette-group-title">Garnitür &amp; Ekstra</div>
+          <div class="chips" id="paletteGarnish"></div>
+        </div>
+        <div>
+          <div class="palette-group-title">Buz &amp; Soğutma</div>
+          <div class="chips" id="paletteIce"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="factPanel" id="factPanel"></div>
+  </div>
+
+  <!-- ===================== RECIPE BOOK PANEL ===================== -->
+  <div class="panel" id="panelBook">
+    <div class="bookIntro">Baristaların kullandığı gerçek ölçülerle hazırlanan tarifler — adına tıkla, taban → ara → kapanış sırasıyla ne eklendiğini gör.</div>
+    <div class="bookFilters" id="bookFilters">
+      <button class="bookFilterBtn active" type="button" data-filter="all">Tümü</button>
+      <button class="bookFilterBtn" type="button" data-filter="hot">Sıcak</button>
+      <button class="bookFilterBtn" type="button" data-filter="cold">Soğuk</button>
+    </div>
+    <div class="bookList" id="bookList"></div>
+  </div>
+
+  <!-- ===================== CUSTOM BUILDER PANEL ===================== -->
+  <div class="panel" id="panelCustom">
+    <div class="bookIntro">Hedef yok, kural yok — istediğin parçayı istediğin sırada ekle, kendi karışımını gör ve beğenirsen bir isimle kaydet.</div>
+
+    <div class="workspace">
+      <div class="tower-box" id="towerBoxCustom">
+        <div class="stackRow">
+          <div>
+            <div class="cup" id="cupElC">
+              <div class="cupGlass"></div>
+              <div class="cupFill" id="cupFillC"></div>
+              <div class="cupRim"></div>
+              <div class="cupHandle"></div>
+            </div>
+            <div class="cupLabel">bardak</div>
+          </div>
+          <div class="tower" id="towerC"></div>
+        </div>
+        <div class="empty-hint" id="emptyHintC">Serbest çalış — sağdaki parçalardan istediğini buraya sürükle.</div>
+      </div>
+
+      <div class="palette-wrap">
+        <div>
+          <div class="palette-group-title">Espresso Bazlı</div>
+          <div class="chips" id="paletteEspressoC"></div>
+        </div>
+        <div>
+          <div class="palette-group-title">Süt &amp; Su</div>
+          <div class="chips" id="paletteMilkC"></div>
+        </div>
+        <div>
+          <div class="palette-group-title">Garnitür &amp; Ekstra</div>
+          <div class="chips" id="paletteGarnishC"></div>
+        </div>
+        <div>
+          <div class="palette-group-title">Buz &amp; Soğutma</div>
+          <div class="chips" id="paletteIceC"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="customActions">
+      <button class="btn ghost small" id="undoCBtn" type="button">Son Parçayı Çıkar</button>
+      <button class="btn ghost small" id="clearCBtn" type="button">Temizle</button>
+      <div class="spacer"></div>
+      <input class="nameInput" id="customName" type="text" placeholder="Tarifine bir isim ver" maxlength="40">
+      <button class="btn" id="saveCBtn" type="button">Kaydet</button>
+    </div>
+
+    <div class="customSummary">
+      <div class="hd">Karışımın</div>
+      <div class="compList" id="customComp" style="margin-top:0;border-top:none;padding-top:0"></div>
+      <div class="totals" id="customTotals" style="text-align:left;margin-top:8px"></div>
+    </div>
+
+    <div class="savedWrap">
+      <div class="savedTitle">BENİM TARİFLERİM</div>
+      <div id="savedList"></div>
+    </div>
+  </div>
+
+  <!-- ===================== GUESS MODE PANEL ===================== -->
+  <div class="panel" id="panelGuess">
+    <div class="bookIntro">Bardağa bak, bloklara dokunma — hangi tarif olduğunu tahmin et. Renk ve katman sayısı tek ipucun.</div>
+    <div class="guessScoreboard">
+      <span id="guessScoreVal">0</span>/<span id="guessTotalVal">0</span> doğru tahmin
+    </div>
+    <div class="workspace">
+      <div class="tower-box" id="towerBoxGuess">
+        <div class="stackRow">
+          <div>
+            <div class="cup" id="cupElG">
+              <div class="cupGlass"></div>
+              <div class="cupFill" id="cupFillG"></div>
+              <div class="cupRim"></div>
+              <div class="cupHandle"></div>
+            </div>
+            <div class="cupLabel">bardak</div>
+          </div>
+          <div class="tower" id="towerG"></div>
+        </div>
+      </div>
+      <div class="guessOptions" id="guessOptions"></div>
+    </div>
+    <div class="guessReveal" id="guessReveal" hidden></div>
+  </div>
+
+  <!-- ===================== BADGES PANEL ===================== -->
+  <div class="panel" id="panelBadges">
+    <div class="bookIntro" id="badgesIntro">Rozetler</div>
+    <div class="badgeGrid" id="badgeGrid"></div>
+  </div>
+
+  <!-- ===================== RACE MODE PANEL ===================== -->
+  <div class="panel" id="panelRace">
+    <div class="bookIntro">Zamana karşı yarış — süre bitmeden olabildiğince çok tarif tamamla. Sıra burada da önemli, ama bu kez saat işliyor.</div>
+
+    <div class="raceStartWrap" id="raceStartWrap">
+      <div class="big">60 saniyen var</div>
+      <div class="sub">Tarifi doğru sırayla tamamladığın an yeni bir tarif geliyor — yanlış parça seni durdurmaz, kombon sıfırlanır ve devam edersin.</div>
+      <div class="raceScoreboard">En iyi skorun: <span id="raceBestValIdle">0</span> tarif</div>
+      <button class="btn" id="raceStartBtn" type="button">Yarışı Başlat</button>
+    </div>
+
+    <div id="raceActiveWrap" hidden>
+      <div class="raceHud">
+        <div class="raceTimer" id="raceTimer">60</div>
+        <div class="raceScoreboard">Skor: <span id="raceScoreVal">0</span> · En iyi: <span id="raceBestVal">0</span></div>
+      </div>
+
+      <div class="ticket" id="raceTicket" style="margin-top:16px">
+        <div class="ticket-head"><span>SİPARİŞ</span></div>
+        <div class="ticket-name" id="raceTargetName">—</div>
+        <div class="ticket-progress" id="raceTargetProgress"></div>
+      </div>
+
+      <div class="workspace" style="margin-top:20px">
+        <div class="tower-box" id="towerBoxRace">
+          <div class="stackRow">
+            <div>
+              <div class="cup" id="cupElR">
+                <div class="cupGlass"></div>
+                <div class="cupFill" id="cupFillR"></div>
+                <div class="cupRim"></div>
+                <div class="cupHandle"></div>
+              </div>
+              <div class="cupLabel">bardak</div>
+            </div>
+            <div class="tower" id="towerR"></div>
+          </div>
+          <div class="empty-hint" id="emptyHintR">Taban parçadan başla.</div>
+        </div>
+
+        <div class="palette-wrap">
+          <div>
+            <div class="palette-group-title">Espresso Bazlı</div>
+            <div class="chips" id="paletteEspressoR"></div>
+          </div>
+          <div>
+            <div class="palette-group-title">Süt &amp; Su</div>
+            <div class="chips" id="paletteMilkR"></div>
+          </div>
+          <div>
+            <div class="palette-group-title">Garnitür &amp; Ekstra</div>
+            <div class="chips" id="paletteGarnishR"></div>
+          </div>
+          <div>
+            <div class="palette-group-title">Buz &amp; Soğutma</div>
+            <div class="chips" id="paletteIceR"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="raceResult" id="raceResult" hidden>
+      <div class="big" id="raceResultBig">Süre bitti!</div>
+      <div class="sub" id="raceResultSub"></div>
+      <div class="record" id="raceResultRecord" hidden></div>
+      <button class="btn" id="raceAgainBtn" type="button">Tekrar Dene</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="sr-only" id="liveRegion" aria-live="polite"></div>
+<div class="badgeToast" id="badgeToast"></div>
+
+<script>
+(function(){
+
+var INGREDIENTS = {
+  ristretto:      { label:"Ristretto",            meta:"15-20 ml",bg:"#FF0000", fg:"#FFFFFF", amount:15,  unit:"ml", group:"espresso",
+                    spec:"10gr kahve, 9 bar basınç, 15-20ml çıktı.",
+                    fact:"Aynı 10gr kahve, aynı 9 bar basınç — süre kısaltılıp su azaltılınca yoğun, az acı bir çekim çıkıyor." },
+  lungo:          { label:"Lungo",                meta:"60 ml",   bg:"#FFE4C4", fg:"#4A3B2E", amount:60,  unit:"ml", group:"espresso",
+                    spec:"10gr kahve, 9 bar basınç, 60ml çıktı.",
+                    fact:"Aynı kahve dozu, daha uzun süzülüyor — daha fazla su, daha hafif gövde ve daha ılımlı bir tat." },
+  espresso:       { label:"Single Espresso",      meta:"30 ml",   bg:"#B22222", fg:"#FFFFFF", amount:30,  unit:"ml", shot:true, group:"espresso",
+                    spec:"10gr kahve, 9 bar basınç, 30ml çıktı.",
+                    fact:"10gr öğütülmüş kahve, 9 bar basınç, 25–30 saniye, 30ml çıktı — tüm tariflerin çıkış noktası." },
+  sicak_su:       { label:"Sıcak Su",             meta:"150 ml",  bg:"#00FFFF", fg:"#0B4A4A", amount:150, unit:"ml", group:"milk",
+                    fact:"Espressoyu inceltir, kafein miktarı aynı kalır ama tat ve gövde daha hafif hissedilir." },
+  duz_sut:        { label:"Düz Sıcak Süt",        meta:"120 ml",  bg:"#708090", fg:"#FFFFFF", amount:120, unit:"ml", group:"milk",
+                    fact:"Köpüksüz, kremasız — buharla ısıtılmış süt espressoyu yumuşatır, dokusunu değiştirmez." },
+  kopuklu_150:    { label:"Köpüklü Süt",          meta:"150 ml",  bg:"#4682B4", fg:"#FFFFFF", amount:150, unit:"ml", group:"milk",
+                    fact:"Süt buharla köpürtülüp mikro-köpük dokusuna getirilir — espressonun üstünde hacim oluşturur." },
+  kopuklu_180:    { label:"Köpüklü Süt",          meta:"180 ml",  bg:"#4682B4", fg:"#FFFFFF", amount:180, unit:"ml", group:"milk",
+                    fact:"Aynı köpüklü süt, daha yüksek hacimde — espressoyu ince bir iz halinde ortada bırakır." },
+  kremali_60:     { label:"Kremalı Süt",          meta:"60 ml",   bg:"#0000CD", fg:"#FFFFFF", amount:60,  unit:"ml", group:"milk",
+                    fact:"Süt, köpük yerine kadifemsi bir krema dokusuna çekilir — daha yoğun ve pürüzsüz bir hissiyat." },
+  kremali_130:    { label:"Kremalı Süt",          meta:"130 ml",  bg:"#0000CD", fg:"#FFFFFF", amount:130, unit:"ml", group:"milk",
+                    fact:"Aynı kremalı süt, daha yüksek hacimde — çikolatayla birleştiğinde gövdeyi dengeler." },
+  kremali_150:    { label:"Kremalı Süt",          meta:"150 ml",  bg:"#0000CD", fg:"#FFFFFF", amount:150, unit:"ml", group:"milk",
+                    fact:"Aynı kremalı süt, Latte ölçüsünde — köpüklü süt değil, pürüzsüz ve kadifemsi bir gövde verir." },
+  cikolata:       { label:"Çikolata",             meta:"20 gr",   bg:"#EE82EE", fg:"#3A1A3A", amount:20,  unit:"gr", group:"garnish",
+                    fact:"20gr gerçek çikolata — süte eklenmez, kendi başına bir parça: tarife bağlı kalmak için ayrı tutulur." },
+  kasik_kopuk:    { label:"1 Kaşık Köpüklü Süt",  meta:"garnitür",bg:"#ADD8E6", fg:"#0B2A3A", amount:5,   unit:"ml", group:"garnish",
+                    fact:"Tam ölçü süt bloğu değil — küçük bir kaşıklık, dekoratif ve hafif bir dokunuş." },
+  kasik_dondurma: { label:"1 Kaşık Dondurma",     meta:"garnitür",bg:"#BDB76B", fg:"#3A3520", amount:30,  unit:"gr", group:"garnish",
+                    fact:"Sıcak espressoyla temas edince yavaşça erir — sıcak/soğuk kontrastı tarifin asıl fikridir." },
+  kasik_krem_santi:{ label:"1 Kaşık Krem Şanti",  meta:"garnitür",bg:"#FFF8DC", fg:"#4A3B2E", amount:5,   unit:"ml", group:"garnish",
+                    fact:"Çırpılmış krema — kaşıkla eklenen hafif bir garnitür, kalıcı değil, tamamen dekoratif." },
+  kondanse_sut:   { label:"Kondanse Süt",         meta:"30 ml",   bg:"#D2A679", fg:"#3A2410", amount:30,  unit:"ml", group:"garnish",
+                    fact:"Şekerle kıvamlaştırılmış süt — İspanya ve Filipinler kökenli, dipte kalan tatlı bir katman." },
+  buz:            { label:"Buz",                  meta:"100 gr",  bg:"#CFEFFF", fg:"#0B3B55", amount:100, unit:"gr", group:"ice",
+                    fact:"Soğuk içeceklerde buz genelde en altta — sıcak espresso üstüne dökülünce hemen erimez, içecek daha uzun soğuk kalır." },
+  soguk_su:       { label:"Soğuk Su",             meta:"120 ml",  bg:"#B3E5FC", fg:"#0B3B55", amount:120, unit:"ml", group:"ice",
+                    fact:"Oda sıcaklığında ya da buzdolabı suyu — Americano'yu sıcak tutmadan inceltir, buzla birlikte serinletir." },
+  vanilya_surubu: { label:"Vanilya Şurubu",       meta:"15 ml",   bg:"#F5DEB3", fg:"#5A4A2A", amount:15,  unit:"ml", group:"garnish",
+                    fact:"Espressoyla birlikte bardağın dibine eklenir, karışınca tatlandırır — şuruplar barista dilinde 'pump' ile ölçülür." },
+  karamel_sos:    { label:"Karamel Sos",          meta:"10 ml",   bg:"#C68E3F", fg:"#3A2410", amount:10,  unit:"ml", group:"garnish",
+                    fact:"Köpüğün üstüne zigzag şeklinde damlatılır — tat kadar görünüm için de eklenen klasik bir kapanış dokunuşu." },
+  esmer_seker:    { label:"Esmer Şeker",          meta:"5 gr",    bg:"#8B5A2B", fg:"#FFFFFF", amount:5,   unit:"gr", group:"garnish",
+                    fact:"Küba kahvesinin imzası — espressoyla birlikte sertçe çırpılınca üstte tatlı, köpüklü bir 'espuma' tabakası oluşturur." },
+  filtre_kahve:   { label:"Filtre Kahve",         meta:"150 ml",  bg:"#5C4033", fg:"#FFFFFF", amount:150, unit:"ml", group:"milk",
+                    fact:"Damla damla süzülen, espressodan çok daha hafif gövdeli bir demleme — espressoyla karışınca kafeini ikiye katlar." }
+};
+
+var TIERS = [
+  { id:1, key:"kahveci", name:"Kahveci",  unlockAt:0  },
+  { id:2, key:"barista",  name:"Barista",  unlockAt:10 },
+  { id:3, key:"gurme",    name:"Gurme",    unlockAt:20 }
+];
+function tierById(id){ return TIERS.filter(function(t){ return t.id === id; })[0]; }
+function unlockedTierId(score){
+  var id = 1;
+  TIERS.forEach(function(t){ if(score >= t.unlockAt) id = Math.max(id, t.id); });
+  return id;
+}
+
+/* cup.type: 'ceramicCup' (kulplu seramik bardak — small or large), 'ceramicMug' (seramik kulplu kupa),
+   'glass' (kulpsuz cam bardak), 'glassHandle' (kulplu cam bardak). min/max = gerçek kap kapasitesi (ml). */
+var RECIPES = [
+  { name:"Ristretto",         parts:["ristretto"], tier:2, cup:{type:"ceramicCup", min:70, max:90} },
+  { name:"Single Espresso",   parts:["espresso"], tier:1, cup:{type:"ceramicCup", min:70, max:90} },
+  { name:"Double Espresso",    parts:["espresso","espresso"], tier:1, cup:{type:"ceramicCup", min:70, max:90} },
+  { name:"Americano",          parts:["espresso","sicak_su"], tier:1, cup:{type:"ceramicMug", min:300, max:400} },
+  { name:"Long Black",         parts:["sicak_su","espresso"], tier:2, cup:{type:"ceramicMug", min:300, max:400} },
+  { name:"Latte",               parts:["espresso","kremali_150"], tier:1, cup:{type:"glass", min:300, max:400} },
+  { name:"Cappuccino",         parts:["espresso","kopuklu_150"], tier:1, cup:{type:"ceramicCup", min:200, max:260} },
+  { name:"Piccola Latte",      parts:["espresso","kremali_60"], tier:3, cup:{type:"glass", min:90, max:110} },
+  { name:"Espresso Macchiato", parts:["espresso","kasik_kopuk"], tier:2, cup:{type:"ceramicCup", min:70, max:90} },
+  { name:"Affogato",           parts:["espresso","kasik_dondurma"], tier:2, cup:{type:"ceramicCup", min:200, max:260} },
+  { name:"Cortado",            parts:["espresso","espresso","kremali_60"], tier:3, cup:{type:"glass", min:120, max:140} },
+  { name:"Flat White",         parts:["espresso","espresso","duz_sut"], tier:2, cup:{type:"glass", min:200, max:220} },
+  { name:"Mocha",              parts:["espresso","cikolata","kremali_130"], tier:2, cup:{type:"ceramicCup", min:200, max:260} },
+  { name:"Latte Macchiato",    parts:["espresso","kopuklu_180"], tier:2, cup:{type:"glassHandle", min:200, max:260} },
+  { name:"Lungo Macchiato",    parts:["lungo","kasik_kopuk"], tier:2, cup:{type:"ceramicCup", min:200, max:260} },
+  { name:"Ristretto Macchiato",parts:["ristretto","kasik_kopuk"], tier:2, cup:{type:"ceramicCup", min:70, max:90} },
+  { name:"Doppio Macchiato",   parts:["espresso","espresso","kasik_kopuk"], tier:2, cup:{type:"ceramicCup", min:70, max:90} },
+  { name:"Long Macchiato",     parts:["espresso","espresso","kasik_kopuk"], tier:2, cup:{type:"ceramicCup", min:70, max:90} },
+  { name:"Espresso Con Panna", parts:["espresso","kasik_krem_santi"], tier:3, cup:{type:"ceramicCup", min:70, max:90} },
+  { name:"Vienna Coffee",      parts:["espresso","espresso","kasik_krem_santi"], tier:2, cup:{type:"ceramicCup", min:70, max:90} },
+  { name:"Bombón",             parts:["kondanse_sut","espresso","kasik_kopuk"], tier:3, cup:{type:"glass", min:90, max:110} },
+  { name:"Ristretto Affogato", parts:["ristretto","kasik_dondurma"], tier:2, cup:{type:"ceramicCup", min:200, max:260} },
+  { name:"Lungo Affogato",     parts:["lungo","kasik_dondurma"], tier:2, cup:{type:"ceramicCup", min:200, max:260} },
+  { name:"Marocchino",         parts:["espresso","cikolata","kasik_kopuk"], tier:3, cup:{type:"ceramicCup", min:70, max:90} },
+  { name:"Caramel Macchiato",  parts:["espresso","vanilya_surubu","kopuklu_150","karamel_sos"], tier:2, cup:{type:"glassHandle", min:200, max:260} },
+  { name:"Iced Americano",     parts:["buz","espresso","soguk_su"], iced:true, tier:2, cup:{type:"glass", min:300, max:400} },
+  { name:"Iced Latte",         parts:["buz","espresso","kremali_150"], iced:true, tier:2, cup:{type:"glass", min:300, max:400} },
+  { name:"Iced Mocha",         parts:["buz","espresso","cikolata","kremali_130"], iced:true, tier:2, cup:{type:"glass", min:300, max:400} },
+  { name:"Iced Flat White",    parts:["buz","espresso","espresso","duz_sut"], iced:true, tier:2, cup:{type:"glass", min:300, max:400} },
+  { name:"Freddo Espresso",    parts:["buz","espresso"], iced:true, tier:3, cup:{type:"glass", min:300, max:400} },
+  { name:"Freddo Cappuccino",  parts:["buz","espresso","kasik_kopuk"], iced:true, tier:3, cup:{type:"glass", min:300, max:400} },
+  { name:"Vanilyalı Latte",    parts:["vanilya_surubu","espresso","kremali_150"], tier:2, cup:{type:"glass", min:300, max:400} },
+  { name:"Karamelli Latte",    parts:["karamel_sos","espresso","kremali_150"], tier:2, cup:{type:"glass", min:300, max:400} },
+  { name:"Eiskaffee",          parts:["espresso","kremali_150","kasik_dondurma","kasik_krem_santi"], iced:true, tier:3, cup:{type:"glass", min:200, max:260} },
+  { name:"Espresso Cubano",    parts:["espresso","esmer_seker"], tier:3, cup:{type:"ceramicCup", min:70, max:90} },
+  { name:"Red Eye",            parts:["espresso","filtre_kahve"], tier:3, cup:{type:"ceramicMug", min:300, max:400} },
+  { name:"Black Eye",          parts:["espresso","espresso","filtre_kahve"], tier:3, cup:{type:"ceramicMug", min:300, max:400} }
+];
+
+var BADGES = [
+  { id:"ilk_adim",    icon:"👣", name:"İlk Adım",            desc:"İlk tarifini tamamla.",
+    check:function(s){ return s.totalCorrect >= 1; } },
+  { id:"barista_ol",  icon:"☕", name:"Barista'ya Yükseldin", desc:"Barista seviyesine ulaş (10 doğru tarif).",
+    check:function(s){ return s.maxTier >= 2; } },
+  { id:"gurme_ol",    icon:"🎓", name:"Gurme Oldun",          desc:"Gurme seviyesine ulaş (20 doğru tarif).",
+    check:function(s){ return s.maxTier >= 3; } },
+  { id:"buz_gibi",    icon:"🧊", name:"Buz Gibi",             desc:"5 soğuk içecek tamamla.",
+    check:function(s){ return s.coldCount >= 5; } },
+  { id:"kusursuz_10", icon:"✨", name:"Kusursuz 10",          desc:"Hiç yanlış yapmadan 10 tarif tamamla.",
+    check:function(s){ return s.noMistakeCount >= 10; } },
+  { id:"kombo_ustasi",icon:"🔥", name:"Kombo Ustası",         desc:"10'luk bir kombo yap.",
+    check:function(s){ return s.bestCombo >= 10; } },
+  { id:"gurme_koleksiyon", icon:"🏆", name:"Gurme Koleksiyoncusu", desc:"10 Gurme tarifi tamamla.",
+    check:function(s){ return s.tier3Count >= 10; } },
+  { id:"goz_ustasi",  icon:"👁️", name:"Göz Ustası",           desc:"\"Bu Ne?\" modunda 5 doğru tahmin yap.",
+    check:function(s){ return s.guessCorrect >= 5; } },
+  { id:"yarisci",     icon:"⏱️", name:"Yarışçı",              desc:"Zamana Karşı Yarış'ta tek seferde 5 tarif tamamla.",
+    check:function(s){ return s.raceBest >= 5; } }
+];
+
+var stats = { totalCorrect:0, coldCount:0, tier3Count:0, noMistakeCount:0, bestCombo:0, guessCorrect:0, maxTier:1, raceBest:0 };
+var unlockedBadges = [];
+
+function loadStats(){
+  try{
+    var raw = localStorage.getItem('espressoBlokStats');
+    if(raw){ var parsed = JSON.parse(raw); if(parsed) stats = Object.assign(stats, parsed); }
+  }catch(e){}
+  try{
+    var raw2 = localStorage.getItem('espressoBlokBadges');
+    if(raw2) unlockedBadges = JSON.parse(raw2) || [];
+  }catch(e){ unlockedBadges = []; }
+}
+function persistStats(){
+  try{ localStorage.setItem('espressoBlokStats', JSON.stringify(stats)); }catch(e){}
+}
+function persistBadges(){
+  try{ localStorage.setItem('espressoBlokBadges', JSON.stringify(unlockedBadges)); }catch(e){}
+}
+function checkNewBadges(){
+  var newlyUnlocked = [];
+  BADGES.forEach(function(b){
+    if(unlockedBadges.indexOf(b.id) === -1 && b.check(stats)){
+      unlockedBadges.push(b.id);
+      newlyUnlocked.push(b);
+    }
+  });
+  if(newlyUnlocked.length){
+    persistBadges();
+    var badgeToastEl = document.getElementById('badgeToast');
+    showToast(badgeToastEl, newlyUnlocked[0].icon + ' Yeni rozet: ' + newlyUnlocked[0].name, 2200);
+    if(typeof renderBadges === 'function') renderBadges();
+  }
+}
+
+var liveRegion = document.getElementById('liveRegion');
+
+var toastTimers = {};
+function showToast(el, text, ms){
+  if(toastTimers[el.id]) clearTimeout(toastTimers[el.id]);
+  el.textContent = text;
+  el.classList.add('show');
+  toastTimers[el.id] = setTimeout(function(){ el.classList.remove('show'); }, ms || 1600);
+}
+
+/* ---------- shared helpers ---------- */
+function computeTotals(parts){
+  var t = { ml:0, gr:0, shots:0 };
+  parts.forEach(function(id){
+    var ing = INGREDIENTS[id];
+    if(ing.unit === 'ml') t.ml += ing.amount;
+    if(ing.unit === 'gr') t.gr += ing.amount;
+    if(ing.shot) t.shots += 1;
+  });
+  return t;
+}
+function totalsLineText(t){
+  var bits = ['Toplam sıvı: ' + t.ml + 'ml'];
+  if(t.gr > 0) bits.push('katkı: ' + t.gr + 'gr');
+  if(t.shots > 0) bits.push(t.shots + ' doz espresso');
+  return bits.join(' · ');
+}
+function renderTowerBlocks(containerEl, parts, pulseLast){
+  containerEl.innerHTML = '';
+  parts.forEach(function(id, i){
+    if(i > 0){
+      var pin = document.createElement('div');
+      pin.className = 'pin' + (pulseLast && i === parts.length - 1 ? ' pulse' : '');
+      containerEl.appendChild(pin);
+    }
+    var ing = INGREDIENTS[id];
+    var blk = document.createElement('div');
+    blk.className = 'block';
+    blk.style.background = ing.bg;
+    blk.style.color = ing.fg;
+    var radius;
+    if(parts.length === 1) radius = '10px';
+    else if(i === 0) radius = '0 0 10px 10px';
+    else if(i === parts.length - 1) radius = '10px 10px 0 0';
+    else radius = '0';
+    blk.style.borderRadius = radius;
+    blk.textContent = ing.label + ' · ' + ing.meta;
+    containerEl.appendChild(blk);
+  });
+}
+function updateCup(cupEl, cupFillEl, totalAmtForShape, parts, matchHeightEl, cupSpec){
+  var filledAmt = parts.reduce(function(s,id){ return s + (INGREDIENTS[id].amount || 0); }, 0);
+  var denom = totalAmtForShape || filledAmt || 1;
+  var capMid = cupSpec ? (cupSpec.min + cupSpec.max) / 2 : denom;
+  cupFillEl.style.height = Math.min(100, (filledAmt / capMid) * 100) + '%';
+  cupFillEl.innerHTML = '';
+  parts.forEach(function(id){
+    var ing = INGREDIENTS[id];
+    var layer = document.createElement('div');
+    layer.className = 'cupLayer';
+    layer.style.background = ing.bg;
+    layer.style.flexGrow = Math.max(ing.amount || 1, 1);
+    cupFillEl.appendChild(layer);
+  });
+  var shape, vessel, iced = parts.indexOf('buz') !== -1;
+  if(cupSpec){
+    /* explicit per-recipe vessel: shape (size) comes from the stated cup capacity,
+       vessel material/handle comes from the stated cup type — not auto-derived from volume */
+    shape = capMid <= 90 ? 'small' : (capMid <= 140 ? 'medium' : (capMid <= 260 ? 'large' : 'xlarge'));
+    if(cupSpec.type === 'ceramicMug') vessel = 'mug';
+    else if(cupSpec.type === 'glass') vessel = 'glass';
+    else if(cupSpec.type === 'glassHandle') vessel = 'glassh';
+    else vessel = (shape === 'small') ? 'demitasse' : 'cup'; /* ceramicCup */
+  }else{
+    shape = denom <= 40 ? 'small' : (denom <= 90 ? 'medium' : (denom <= 180 ? 'large' : 'xlarge'));
+    vessel = iced ? 'tumbler' :
+      (shape === 'small' ? 'demitasse' : shape === 'medium' ? 'cup' : shape === 'large' ? 'mug' : 'glass');
+  }
+  cupEl.className = 'cup cup--' + shape + ' cup--' + vessel + (iced ? ' cup--iced' : '');
+  var baseVol = cupSpec ? Math.min(capMid, 400) : Math.min(denom, 300);
+  var mult = cupSpec ? 0.325 : 0.42;
+  var volH = 66 + baseVol * mult;
+  cupEl.style.height = Math.max(70, Math.min(196, volH)) + 'px';
+}
+
+/* ---------- generic drag & drop (pointer events) ---------- */
+var dragging = null;
+function isOverZone(zoneEl, e){
+  var rect = zoneEl.getBoundingClientRect();
+  return e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom;
+}
+function startDrag(e, id, chipEl, dropZoneEl, onDrop){
+  if(chipEl.style.pointerEvents === 'none') return;
+  e.preventDefault();
+  var rect = chipEl.getBoundingClientRect();
+  var clone = chipEl.cloneNode(true);
+  clone.style.position = 'fixed';
+  clone.style.left = rect.left + 'px';
+  clone.style.top = rect.top + 'px';
+  clone.style.width = rect.width + 'px';
+  clone.style.margin = '0';
+  clone.style.zIndex = '999';
+  clone.style.pointerEvents = 'none';
+  clone.style.opacity = '0.95';
+  clone.style.transform = 'scale(1.05) rotate(-1.5deg)';
+  clone.style.boxShadow = '0 14px 28px rgba(0,0,0,.3)';
+  document.body.appendChild(clone);
+  dragging = { id:id, clone:clone, offX: e.clientX - rect.left, offY: e.clientY - rect.top, chipEl:chipEl, dropZoneEl:dropZoneEl, onDrop:onDrop };
+  chipEl.style.opacity = '0.35';
+  document.addEventListener('pointermove', onDragMove);
+  document.addEventListener('pointerup', onDragEnd);
+}
+function onDragMove(e){
+  if(!dragging) return;
+  dragging.clone.style.left = (e.clientX - dragging.offX) + 'px';
+  dragging.clone.style.top = (e.clientY - dragging.offY) + 'px';
+  dragging.dropZoneEl.classList.toggle('dragover', isOverZone(dragging.dropZoneEl, e));
+}
+function onDragEnd(e){
+  if(!dragging) return;
+  var d = dragging;
+  var dropped = isOverZone(d.dropZoneEl, e);
+  d.clone.remove();
+  d.chipEl.style.opacity = '';
+  d.dropZoneEl.classList.remove('dragover');
+  document.removeEventListener('pointermove', onDragMove);
+  document.removeEventListener('pointerup', onDragEnd);
+  dragging = null;
+  if(dropped) d.onDrop(d.id);
+}
+function buildChip(id, idPrefix, containerEl, dropZoneEl, onDrop){
+  var ing = INGREDIENTS[id];
+  var b = document.createElement('button');
+  b.className = 'ing';
+  b.type = 'button';
+  b.id = idPrefix + id;
+  b.style.background = ing.bg;
+  b.style.color = ing.fg;
+  b.innerHTML = ing.label + '<span>' + ing.meta + '</span>';
+  b.addEventListener('pointerdown', function(e){ startDrag(e, id, b, dropZoneEl, onDrop); });
+  b.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); onDrop(id); }
+  });
+  containerEl.appendChild(b);
+}
+
+/* ===================== TAB SWITCHING ===================== */
+var panels = {
+  game: document.getElementById('panelGame'),
+  book: document.getElementById('panelBook'),
+  guess: document.getElementById('panelGuess'),
+  badges: document.getElementById('panelBadges'),
+  race: document.getElementById('panelRace'),
+  custom: document.getElementById('panelCustom')
+};
+var tabButtons = Array.prototype.slice.call(document.querySelectorAll('.tabbtn'));
+tabButtons.forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var tab = btn.getAttribute('data-tab');
+    if(tab !== 'race') stopRaceIfActive();
+    tabButtons.forEach(function(b){ b.classList.toggle('active', b === btn); });
+    Object.keys(panels).forEach(function(k){ panels[k].classList.toggle('active', k === tab); });
+    if(tab === 'book') renderBook();
+    if(tab === 'custom') renderCustom();
+    if(tab === 'badges') renderBadges();
+    if(tab === 'guess') startGuessRound();
+    if(tab === 'race') renderRaceIdle();
+  });
+});
+
+/* ===================== GAME ===================== */
+var towerEl = document.getElementById('tower');
+var towerBox = document.getElementById('towerBox');
+var targetName = document.getElementById('targetName');
+var targetProgress = document.getElementById('targetProgress');
+var successBox = document.getElementById('successBox');
+var successLabel = document.getElementById('successLabel');
+var emptyHint = document.getElementById('emptyHint');
+var scoreVal = document.getElementById('scoreVal');
+var totalVal = document.getElementById('totalVal');
+var recipeCounter = document.getElementById('recipeCounter');
+var recipePoolSize = document.getElementById('recipePoolSize');
+var cupEl = document.getElementById('cupEl');
+var cupFill = document.getElementById('cupFill');
+var levelName = document.getElementById('levelName');
+var levelFill = document.getElementById('levelFill');
+var levelNext = document.getElementById('levelNext');
+
+function renderLevelBar(){
+  var tierId = unlockedTierId(state.score);
+  var tier = tierById(tierId);
+  levelName.textContent = tier.name;
+  var next = tierById(tierId + 1);
+  if(next){
+    var span = next.unlockAt - tier.unlockAt;
+    var progress = Math.min(1, (state.score - tier.unlockAt) / span);
+    levelFill.style.width = (progress * 100) + '%';
+    levelNext.textContent = state.score + '/' + next.unlockAt + ' · ' + next.name + ' seviyesine';
+  }else{
+    levelFill.style.width = '100%';
+    levelNext.textContent = 'en üst seviye';
+  }
+}
+
+recipePoolSize.textContent = RECIPES.length + ' TARİF';
+
+var GROUP_EL = {
+  espresso: document.getElementById('paletteEspresso'),
+  milk: document.getElementById('paletteMilk'),
+  garnish: document.getElementById('paletteGarnish'),
+  ice: document.getElementById('paletteIce')
+};
+Object.keys(INGREDIENTS).forEach(function(id){
+  var ing = INGREDIENTS[id];
+  buildChip(id, 'ing-', GROUP_EL[ing.group] || GROUP_EL.espresso, towerBox, function(pid){ evaluateAttempt(pid); });
+});
+
+var state = { recipeIndex: -1, stack: [], score: 0, total: 0, revealed: false, combo: 0, bestCombo: 0 };
+var justAdded = false;
+var hadMistakeThisAttempt = false;
+var recipeStartTime = Date.now();
+var bestTimes = {};
+function loadBestTimes(){
+  try{
+    var raw = localStorage.getItem('espressoBlokBestTimes');
+    if(raw) bestTimes = JSON.parse(raw) || {};
+  }catch(e){ bestTimes = {}; }
+}
+function persistBestTimes(){
+  try{ localStorage.setItem('espressoBlokBestTimes', JSON.stringify(bestTimes)); }catch(e){}
+}
+function renderComboBadge(){
+  var badge = document.getElementById('comboBadge');
+  var val = document.getElementById('comboVal');
+  if(state.combo >= 2){
+    val.textContent = state.combo;
+    badge.hidden = false;
+  }else{
+    badge.hidden = true;
+  }
+}
+
+function pickRecipe(excludeIndex){
+  var maxTier = unlockedTierId(state.score);
+  var pool = RECIPES.map(function(_,i){return i;}).filter(function(i){
+    return i !== excludeIndex && RECIPES[i].tier <= maxTier;
+  });
+  if(pool.length === 0) pool = RECIPES.map(function(_,i){return i;}).filter(function(i){return i !== excludeIndex;});
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+function startRecipe(index){
+  state.recipeIndex = index;
+  state.stack = [];
+  state.revealed = false;
+  hadMistakeThisAttempt = false;
+  recipeStartTime = Date.now();
+  document.getElementById('factPanel').classList.remove('show');
+  document.getElementById('levelUpMsg').hidden = true;
+  document.getElementById('speedMsg').textContent = '';
+  render();
+}
+
+function currentRecipe(){ return RECIPES[state.recipeIndex]; }
+
+function render(){
+  var r = currentRecipe();
+  targetName.innerHTML = '<span>' + r.name + '</span><span class="tempBadge ' + (r.iced ? 'cold">SOĞUK' : 'hot">SICAK') + '</span>';
+  recipeCounter.textContent = 'SİPARİŞ #' + String(state.total + 1).padStart(2,'0');
+  scoreVal.textContent = state.score;
+  totalVal.textContent = state.total;
+  renderLevelBar();
+  renderComboBadge();
+
+  targetProgress.innerHTML = '';
+  for(var i = 0; i < r.parts.length; i++){
+    var dot = document.createElement('div');
+    dot.className = 'dot' + (i < state.stack.length ? ' filled' : '');
+    targetProgress.appendChild(dot);
+  }
+  var cap = document.createElement('div');
+  cap.className = 'cap';
+  cap.textContent = state.stack.length + ' / ' + r.parts.length + ' parça';
+  targetProgress.appendChild(cap);
+
+  renderTowerBlocks(towerEl, state.stack, justAdded);
+  justAdded = false;
+
+  var totalAmt = r.parts.reduce(function(s,id){ return s + (INGREDIENTS[id].amount || 0); }, 0);
+  updateCup(cupEl, cupFill, totalAmt, state.stack, towerEl, r.cup);
+
+  var solved = state.stack.length === r.parts.length;
+  emptyHint.style.display = (state.stack.length === 0 && !solved) ? 'block' : 'none';
+  successBox.classList.toggle('show', solved);
+  successBox.classList.toggle('revealed', solved && state.revealed);
+  successBox.classList.toggle('iced', !!r.iced);
+  if(solved){
+    successLabel.textContent = state.revealed ? (r.name + ' — çözüm gösterildi') : (r.name + ' tamamlandı');
+    renderComposition(r);
+  }
+}
+
+function renderComposition(r){
+  var compList = document.getElementById('compList');
+  compList.innerHTML = '';
+  r.parts.forEach(function(id){
+    var ing = INGREDIENTS[id];
+    var row = document.createElement('div');
+    row.className = 'ct';
+    row.innerHTML = '<b>' + ing.label + '</b><span>' + ing.meta + '</span>';
+    compList.appendChild(row);
+  });
+  document.getElementById('totalsLine').textContent = totalsLineText(computeTotals(r.parts));
+}
+
+var COMBO_MILESTONES = [3, 5, 10, 15, 20, 30, 50];
+
+function evaluateAttempt(id){
+  if(dragging) return;
+  var r = currentRecipe();
+  if(state.stack.length >= r.parts.length) return;
+  var expected = r.parts[state.stack.length];
+  if(id === expected){
+    state.stack.push(id);
+    justAdded = true;
+    var wasLast = state.stack.length === r.parts.length;
+    var tierBefore = unlockedTierId(state.score);
+    var tierAfter = tierBefore;
+
+    state.combo++;
+    if(state.combo > state.bestCombo) state.bestCombo = state.combo;
+    if(state.bestCombo > stats.bestCombo) stats.bestCombo = state.bestCombo;
+
+    var elapsedSec = null, isRecord = false;
+    if(wasLast){
+      state.score++; state.total++;
+      tierAfter = unlockedTierId(state.score);
+      stats.totalCorrect++;
+      if(r.iced) stats.coldCount++;
+      if(r.tier === 3) stats.tier3Count++;
+      if(!hadMistakeThisAttempt) stats.noMistakeCount++;
+      if(tierAfter > stats.maxTier) stats.maxTier = tierAfter;
+      elapsedSec = (Date.now() - recipeStartTime) / 1000;
+      isRecord = !bestTimes[r.name] || elapsedSec < bestTimes[r.name];
+      if(isRecord) bestTimes[r.name] = elapsedSec;
+      persistBestTimes();
+      persistStats();
+    }
+
+    render();
+    showFact(id);
+
+    var msgEl = document.getElementById('levelUpMsg');
+    var speedEl = document.getElementById('speedMsg');
+    if(wasLast){
+      if(tierAfter > tierBefore){
+        msgEl.textContent = '🎉 Tebrikler, ' + tierById(tierAfter).name + ' seviyesine yükseldin!';
+        msgEl.hidden = false;
+        liveRegion.textContent = tierById(tierAfter).name + ' seviyesine yükseldin.';
+      }else{
+        msgEl.hidden = true;
+        liveRegion.textContent = r.name + ' doğru tamamlandı.';
+      }
+      speedEl.textContent = '⏱ ' + elapsedSec.toFixed(1) + 's' + (isRecord ? ' · Yeni rekor!' : ' · En hızlı: ' + bestTimes[r.name].toFixed(1) + 's');
+      speedEl.classList.toggle('record', isRecord);
+      checkNewBadges();
+    }else{
+      liveRegion.textContent = INGREDIENTS[id].label + ' doğru — sırada bir sonraki parça var.';
+    }
+
+    if(COMBO_MILESTONES.indexOf(state.combo) !== -1){
+      showToast(document.getElementById('comboToast'), state.combo + '\'lü kombo! 🔥', 1500);
+    }
+  }else{
+    state.combo = 0;
+    hadMistakeThisAttempt = true;
+    renderComboBadge();
+    towerBox.classList.remove('shake'); void towerBox.offsetWidth; towerBox.classList.add('shake');
+    liveRegion.textContent = 'Yanlış parça, sırayı kontrol et.';
+  }
+  saveSnapshot();
+}
+
+function showFact(id){
+  var ing = INGREDIENTS[id];
+  var panel = document.getElementById('factPanel');
+  panel.innerHTML = '<b>' + ing.label + ' · ' + ing.meta + '</b>' + ing.fact;
+  panel.classList.remove('show'); void panel.offsetWidth; panel.classList.add('show');
+}
+
+document.getElementById('resetBtn').addEventListener('click', function(){
+  state.stack = [];
+  state.revealed = false;
+  hadMistakeThisAttempt = false;
+  recipeStartTime = Date.now();
+  document.getElementById('factPanel').classList.remove('show');
+  document.getElementById('speedMsg').textContent = '';
+  render(); saveSnapshot();
+});
+
+document.getElementById('giveupBtn').addEventListener('click', function(){
+  var r = currentRecipe();
+  if(state.stack.length === r.parts.length) return;
+  state.stack = r.parts.slice();
+  state.revealed = true;
+  state.total++;
+  state.combo = 0;
+  renderComboBadge();
+  document.getElementById('factPanel').classList.remove('show');
+  document.getElementById('speedMsg').textContent = '';
+  render(); saveSnapshot();
+});
+
+document.getElementById('skipBtn').addEventListener('click', function(){
+  if(!(state.stack.length === currentRecipe().parts.length)){
+    state.total++;
+  }
+  startRecipe(pickRecipe(state.recipeIndex));
+  saveSnapshot();
+});
+
+document.getElementById('nextBtn').addEventListener('click', function(){
+  startRecipe(pickRecipe(state.recipeIndex));
+  saveSnapshot();
+});
+
+/* ===================== RECIPE BOOK ===================== */
+var bookList = document.getElementById('bookList');
+var bookOpen = -1;
+var bookFilter = 'all';
+Array.prototype.slice.call(document.querySelectorAll('.bookFilterBtn')).forEach(function(btn){
+  btn.addEventListener('click', function(){
+    bookFilter = btn.getAttribute('data-filter');
+    Array.prototype.slice.call(document.querySelectorAll('.bookFilterBtn')).forEach(function(b){ b.classList.toggle('active', b === btn); });
+    bookOpen = -1;
+    renderBook();
+  });
+});
+function renderBook(){
+  bookList.innerHTML = '';
+  var maxTier = unlockedTierId(state.score);
+  TIERS.forEach(function(tier){
+    var itemsForTier = RECIPES
+      .map(function(r, idx){ return { r:r, idx:idx }; })
+      .filter(function(o){
+        if(o.r.tier !== tier.id) return false;
+        if(bookFilter === 'hot' && o.r.iced) return false;
+        if(bookFilter === 'cold' && !o.r.iced) return false;
+        return true;
+      });
+    if(itemsForTier.length === 0) return;
+
+    var sectionLocked = tier.id > maxTier;
+    var sectionHead = document.createElement('div');
+    sectionHead.className = 'bookTierHead' + (sectionLocked ? ' locked' : '');
+    sectionHead.innerHTML = tier.name + (sectionLocked
+      ? ' <span class="lockNote">— ' + tier.unlockAt + ' doğru tarifte açılır</span>'
+      : '');
+    bookList.appendChild(sectionHead);
+
+    itemsForTier.forEach(function(o){
+    var r = o.r, idx = o.idx;
+    var totals = computeTotals(r.parts);
+    var item = document.createElement('div');
+    item.className = 'bookItem' + (bookOpen === idx ? ' open' : '');
+
+    var head = document.createElement('button');
+    head.type = 'button';
+    head.className = 'bookHead';
+    head.innerHTML = '<span class="nm">' + r.name + '</span><span class="meta"><span class="tempBadge ' +
+      (r.iced ? 'cold">SOĞUK' : 'hot">SICAK') + '</span> ' + r.parts.length + ' parça</span><span class="chev">▾</span>';
+    head.addEventListener('click', function(){
+      bookOpen = (bookOpen === idx) ? -1 : idx;
+      renderBook();
+    });
+    item.appendChild(head);
+
+    var detail = document.createElement('div');
+    detail.className = 'bookDetail';
+    r.parts.forEach(function(id, i){
+      var ing = INGREDIENTS[id];
+      var row = document.createElement('div');
+      row.className = 'bookRow';
+      var sw = document.createElement('div');
+      sw.className = 'sw'; sw.style.background = ing.bg;
+      var ord = document.createElement('div');
+      ord.className = 'ord'; ord.textContent = (i+1) + '.';
+      var nm2 = document.createElement('div');
+      nm2.className = 'nm2'; nm2.textContent = ing.label;
+      var meta = document.createElement('div');
+      meta.className = 'meta'; meta.textContent = ing.meta;
+      row.appendChild(ord); row.appendChild(sw); row.appendChild(nm2); row.appendChild(meta);
+      detail.appendChild(row);
+      if(ing.spec){
+        var specEl = document.createElement('div');
+        specEl.className = 'bookSpecLine';
+        specEl.textContent = ing.spec;
+        detail.appendChild(specEl);
+      }
+    });
+    var totalsEl = document.createElement('div');
+    totalsEl.className = 'bookTotalsLine';
+    totalsEl.textContent = totalsLineText(totals);
+    detail.appendChild(totalsEl);
+    item.appendChild(detail);
+
+    bookList.appendChild(item);
+    });
+  });
+}
+
+/* ===================== CUSTOM BUILDER ===================== */
+var towerC = document.getElementById('towerC');
+var towerBoxCustom = document.getElementById('towerBoxCustom');
+var emptyHintC = document.getElementById('emptyHintC');
+var cupElC = document.getElementById('cupElC');
+var cupFillC = document.getElementById('cupFillC');
+var customStack = [];
+var savedRecipes = [];
+
+var GROUP_EL_C = {
+  espresso: document.getElementById('paletteEspressoC'),
+  milk: document.getElementById('paletteMilkC'),
+  garnish: document.getElementById('paletteGarnishC'),
+  ice: document.getElementById('paletteIceC')
+};
+Object.keys(INGREDIENTS).forEach(function(id){
+  var ing = INGREDIENTS[id];
+  buildChip(id, 'ingC-', GROUP_EL_C[ing.group] || GROUP_EL_C.espresso, towerBoxCustom, function(pid){
+    customStack.push(pid);
+    renderCustom();
+  });
+});
+
+function renderCustom(){
+  renderTowerBlocks(towerC, customStack, false);
+  updateCup(cupElC, cupFillC, null, customStack, towerC);
+  emptyHintC.style.display = customStack.length === 0 ? 'block' : 'none';
+
+  var compList = document.getElementById('customComp');
+  compList.innerHTML = '';
+  customStack.forEach(function(id){
+    var ing = INGREDIENTS[id];
+    var row = document.createElement('div');
+    row.className = 'ct';
+    row.innerHTML = '<b>' + ing.label + '</b><span>' + ing.meta + '</span>';
+    compList.appendChild(row);
+  });
+  document.getElementById('customTotals').textContent = customStack.length ? totalsLineText(computeTotals(customStack)) : 'Henüz parça eklenmedi.';
+}
+
+document.getElementById('undoCBtn').addEventListener('click', function(){
+  customStack.pop();
+  renderCustom();
+});
+document.getElementById('clearCBtn').addEventListener('click', function(){
+  customStack = [];
+  renderCustom();
+});
+document.getElementById('saveCBtn').addEventListener('click', function(){
+  if(customStack.length === 0) return;
+  var nameInput = document.getElementById('customName');
+  var name = nameInput.value.trim() || ('Tarifim #' + (savedRecipes.length + 1));
+  savedRecipes.push({ name:name, parts:customStack.slice() });
+  nameInput.value = '';
+  customStack = [];
+  persistSaved();
+  renderCustom();
+  renderSaved();
+  liveRegion.textContent = name + ' kaydedildi.';
+});
+
+var savedListEl = document.getElementById('savedList');
+function renderSaved(){
+  savedListEl.innerHTML = '';
+  if(savedRecipes.length === 0){
+    var empty = document.createElement('div');
+    empty.className = 'savedEmpty';
+    empty.textContent = 'Henüz kaydedilmiş bir tarifin yok.';
+    savedListEl.appendChild(empty);
+    return;
+  }
+  savedRecipes.forEach(function(rec, idx){
+    var totals = computeTotals(rec.parts);
+    var item = document.createElement('div');
+    item.className = 'savedItem';
+    var left = document.createElement('div');
+    left.innerHTML = '<div class="nm">' + rec.name + '</div><div class="meta">' + rec.parts.length + ' parça · ' + totalsLineText(totals) + '</div>';
+    var del = document.createElement('button');
+    del.className = 'btn ghost small';
+    del.type = 'button';
+    del.textContent = 'Sil';
+    del.addEventListener('click', function(){
+      savedRecipes.splice(idx, 1);
+      persistSaved();
+      renderSaved();
+    });
+    item.appendChild(left);
+    item.appendChild(del);
+    savedListEl.appendChild(item);
+  });
+}
+
+function persistSaved(){
+  try{ localStorage.setItem('espressoBlokCustomRecipes', JSON.stringify(savedRecipes)); }catch(e){}
+}
+function loadSaved(){
+  try{
+    var raw = localStorage.getItem('espressoBlokCustomRecipes');
+    if(raw) savedRecipes = JSON.parse(raw) || [];
+  }catch(e){ savedRecipes = []; }
+}
+
+/* ===================== BADGES ===================== */
+var badgeGrid = document.getElementById('badgeGrid');
+var badgesIntro = document.getElementById('badgesIntro');
+function renderBadges(){
+  badgeGrid.innerHTML = '';
+  var unlockedCount = BADGES.filter(function(b){ return unlockedBadges.indexOf(b.id) !== -1; }).length;
+  badgesIntro.textContent = unlockedCount + ' / ' + BADGES.length + ' rozet kazanıldı';
+  BADGES.forEach(function(b){
+    var unlocked = unlockedBadges.indexOf(b.id) !== -1;
+    var card = document.createElement('div');
+    card.className = 'badgeCard' + (unlocked ? '' : ' locked');
+    card.innerHTML = '<div class="icon">' + b.icon + '</div><div><div class="nm">' + b.name + '</div><div class="desc">' + b.desc + '</div></div>';
+    badgeGrid.appendChild(card);
+  });
+}
+
+/* ===================== GUESS MODE ("Bu Ne?") ===================== */
+var towerG = document.getElementById('towerG');
+var cupElG = document.getElementById('cupElG');
+var cupFillG = document.getElementById('cupFillG');
+var guessOptionsEl = document.getElementById('guessOptions');
+var guessRevealEl = document.getElementById('guessReveal');
+var guessScoreValEl = document.getElementById('guessScoreVal');
+var guessTotalValEl = document.getElementById('guessTotalVal');
+var guessScore = 0, guessTotal = 0, guessCurrent = null, guessAnswered = false;
+
+function renderTowerBlocksBlind(containerEl, parts){
+  containerEl.innerHTML = '';
+  parts.forEach(function(id, i){
+    if(i > 0){
+      var pin = document.createElement('div');
+      pin.className = 'pin';
+      containerEl.appendChild(pin);
+    }
+    var ing = INGREDIENTS[id];
+    var blk = document.createElement('div');
+    blk.className = 'block';
+    blk.style.background = ing.bg;
+    blk.style.color = ing.fg;
+    var radius;
+    if(parts.length === 1) radius = '10px';
+    else if(i === 0) radius = '0 0 10px 10px';
+    else if(i === parts.length - 1) radius = '10px 10px 0 0';
+    else radius = '0';
+    blk.style.borderRadius = radius;
+    blk.textContent = '?';
+    containerEl.appendChild(blk);
+  });
+}
+
+function startGuessRound(){
+  var maxTier = unlockedTierId(state.score);
+  var pool = RECIPES.filter(function(r){ return r.tier <= maxTier; });
+  if(pool.length < 4) pool = RECIPES.slice();
+  guessCurrent = pool[Math.floor(Math.random() * pool.length)];
+  guessAnswered = false;
+  guessRevealEl.hidden = true;
+  guessRevealEl.innerHTML = '';
+
+  renderTowerBlocksBlind(towerG, guessCurrent.parts);
+  var totalAmt = guessCurrent.parts.reduce(function(s,id){ return s + (INGREDIENTS[id].amount || 0); }, 0);
+  updateCup(cupElG, cupFillG, totalAmt, guessCurrent.parts, towerG, guessCurrent.cup);
+
+  var distractors = pool.filter(function(r){ return r.name !== guessCurrent.name; });
+  distractors = distractors.sort(function(){ return Math.random() - 0.5; }).slice(0, 3);
+  var options = distractors.concat([guessCurrent]).sort(function(){ return Math.random() - 0.5; });
+
+  guessOptionsEl.innerHTML = '';
+  options.forEach(function(opt){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'guessOptBtn';
+    b.textContent = opt.name;
+    b.addEventListener('click', function(){ answerGuess(opt, b); });
+    guessOptionsEl.appendChild(b);
+  });
+
+  guessScoreValEl.textContent = guessScore;
+  guessTotalValEl.textContent = guessTotal;
+}
+
+function answerGuess(opt, btnEl){
+  if(guessAnswered) return;
+  guessAnswered = true;
+  guessTotal++;
+  var isCorrect = opt.name === guessCurrent.name;
+  if(isCorrect){
+    guessScore++;
+    stats.guessCorrect++;
+    persistStats();
+    checkNewBadges();
+  }
+  Array.prototype.slice.call(guessOptionsEl.children).forEach(function(b){
+    b.disabled = true;
+    if(b.textContent === guessCurrent.name) b.classList.add('correct');
+    else if(b === btnEl) b.classList.add('wrong');
+  });
+  guessScoreValEl.textContent = guessScore;
+  guessTotalValEl.textContent = guessTotal;
+
+  var totals = computeTotals(guessCurrent.parts);
+  var compHtml = guessCurrent.parts.map(function(id){
+    var ing = INGREDIENTS[id];
+    return '<div class="ct"><b>' + ing.label + '</b><span>' + ing.meta + '</span></div>';
+  }).join('');
+  guessRevealEl.innerHTML = '<div class="hd">' + (isCorrect ? '✓ Doğru bildin!' : '✗ Doğrusu: ') + (isCorrect ? '' : guessCurrent.name) + '</div>' +
+    '<div class="compList" style="margin-top:0;border-top:none;padding-top:0">' + compHtml + '</div>' +
+    '<div class="totals" style="text-align:left;margin-top:8px">' + totalsLineText(totals) + '</div>' +
+    '<div class="nextBtnWrap"><button class="btn" id="guessNextBtn" type="button">Sıradaki</button></div>';
+  guessRevealEl.hidden = false;
+  document.getElementById('guessNextBtn').addEventListener('click', startGuessRound);
+}
+
+/* ===================== RACE MODE ("Zamana Karşı Yarış") ===================== */
+var RACE_DURATION = 60;
+var raceStartWrap = document.getElementById('raceStartWrap');
+var raceActiveWrap = document.getElementById('raceActiveWrap');
+var raceResultEl = document.getElementById('raceResult');
+var raceTimerEl = document.getElementById('raceTimer');
+var raceScoreValEl = document.getElementById('raceScoreVal');
+var raceBestValEl = document.getElementById('raceBestVal');
+var raceBestValIdleEl = document.getElementById('raceBestValIdle');
+var raceTargetName = document.getElementById('raceTargetName');
+var raceTargetProgress = document.getElementById('raceTargetProgress');
+var towerR = document.getElementById('towerR');
+var towerBoxRace = document.getElementById('towerBoxRace');
+var emptyHintR = document.getElementById('emptyHintR');
+var cupElR = document.getElementById('cupElR');
+var cupFillR = document.getElementById('cupFillR');
+
+var raceBest = 0;
+function loadRaceBest(){
+  try{
+    var raw = localStorage.getItem('espressoBlokRaceBest');
+    if(raw) raceBest = parseInt(raw, 10) || 0;
+  }catch(e){ raceBest = 0; }
+}
+function persistRaceBest(){
+  try{ localStorage.setItem('espressoBlokRaceBest', String(raceBest)); }catch(e){}
+}
+
+var raceState = { active:false, timeLeft:RACE_DURATION, score:0, recipeIndex:-1, stack:[] };
+var raceTimerHandle = null;
+var raceJustAdded = false;
+
+var GROUP_EL_R = {
+  espresso: document.getElementById('paletteEspressoR'),
+  milk: document.getElementById('paletteMilkR'),
+  garnish: document.getElementById('paletteGarnishR'),
+  ice: document.getElementById('paletteIceR')
+};
+Object.keys(INGREDIENTS).forEach(function(id){
+  var ing = INGREDIENTS[id];
+  buildChip(id, 'ingR-', GROUP_EL_R[ing.group] || GROUP_EL_R.espresso, towerBoxRace, function(pid){ evaluateRaceAttempt(pid); });
+});
+
+function renderRaceIdle(){
+  if(raceState.active) return;
+  raceStartWrap.hidden = false;
+  raceActiveWrap.hidden = true;
+  raceResultEl.hidden = true;
+  raceBestValIdleEl.textContent = raceBest;
+}
+
+function pickRaceRecipe(excludeIndex){
+  var maxTier = unlockedTierId(state.score);
+  var pool = RECIPES.map(function(_,i){return i;}).filter(function(i){
+    return i !== excludeIndex && RECIPES[i].tier <= maxTier;
+  });
+  if(pool.length === 0) pool = RECIPES.map(function(_,i){return i;}).filter(function(i){return i !== excludeIndex;});
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+function startRaceRecipe(index){
+  raceState.recipeIndex = index;
+  raceState.stack = [];
+  renderRace();
+}
+
+function currentRaceRecipe(){ return RECIPES[raceState.recipeIndex]; }
+
+function renderRace(){
+  var r = currentRaceRecipe();
+  raceTargetName.innerHTML = '<span>' + r.name + '</span><span class="tempBadge ' + (r.iced ? 'cold">SOĞUK' : 'hot">SICAK') + '</span>';
+  raceScoreValEl.textContent = raceState.score;
+  raceBestValEl.textContent = raceBest;
+
+  raceTargetProgress.innerHTML = '';
+  for(var i = 0; i < r.parts.length; i++){
+    var dot = document.createElement('div');
+    dot.className = 'dot' + (i < raceState.stack.length ? ' filled' : '');
+    raceTargetProgress.appendChild(dot);
+  }
+  var cap = document.createElement('div');
+  cap.className = 'cap';
+  cap.textContent = raceState.stack.length + ' / ' + r.parts.length + ' parça';
+  raceTargetProgress.appendChild(cap);
+
+  renderTowerBlocks(towerR, raceState.stack, raceJustAdded);
+  raceJustAdded = false;
+
+  var totalAmt = r.parts.reduce(function(s,id){ return s + (INGREDIENTS[id].amount || 0); }, 0);
+  updateCup(cupElR, cupFillR, totalAmt, raceState.stack, towerR, r.cup);
+  emptyHintR.style.display = raceState.stack.length === 0 ? 'block' : 'none';
+}
+
+function evaluateRaceAttempt(id){
+  if(!raceState.active || dragging) return;
+  var r = currentRaceRecipe();
+  if(raceState.stack.length >= r.parts.length) return;
+  var expected = r.parts[raceState.stack.length];
+  if(id === expected){
+    raceState.stack.push(id);
+    raceJustAdded = true;
+    if(raceState.stack.length === r.parts.length){
+      raceState.score++;
+      liveRegion.textContent = r.name + ' tamamlandı. Skor: ' + raceState.score;
+      renderRace();
+      setTimeout(function(){
+        if(raceState.active) startRaceRecipe(pickRaceRecipe(raceState.recipeIndex));
+      }, 260);
+      return;
+    }
+    renderRace();
+  }else{
+    towerBoxRace.classList.remove('shake'); void towerBoxRace.offsetWidth; towerBoxRace.classList.add('shake');
+    liveRegion.textContent = 'Yanlış parça, sırayı kontrol et.';
+  }
+}
+
+function startRaceGame(){
+  loadRaceBest();
+  raceState.active = true;
+  raceState.timeLeft = RACE_DURATION;
+  raceState.score = 0;
+  raceStartWrap.hidden = true;
+  raceResultEl.hidden = true;
+  raceActiveWrap.hidden = false;
+  raceTimerEl.textContent = raceState.timeLeft;
+  raceTimerEl.classList.remove('low');
+  startRaceRecipe(pickRaceRecipe(-1));
+  if(raceTimerHandle) clearInterval(raceTimerHandle);
+  raceTimerHandle = setInterval(tickRace, 1000);
+}
+
+function tickRace(){
+  raceState.timeLeft--;
+  raceTimerEl.textContent = raceState.timeLeft;
+  raceTimerEl.classList.toggle('low', raceState.timeLeft <= 10);
+  if(raceState.timeLeft <= 0) endRace();
+}
+
+function endRace(){
+  if(raceTimerHandle){ clearInterval(raceTimerHandle); raceTimerHandle = null; }
+  raceState.active = false;
+  var isRecord = raceState.score > raceBest;
+  if(isRecord){
+    raceBest = raceState.score;
+    persistRaceBest();
+    if(raceBest > stats.raceBest){ stats.raceBest = raceBest; persistStats(); checkNewBadges(); }
+  }
+  raceActiveWrap.hidden = true;
+  raceResultEl.hidden = false;
+  document.getElementById('raceResultSub').textContent = raceState.score + ' tarif tamamladın.';
+  var recordEl = document.getElementById('raceResultRecord');
+  if(isRecord){
+    recordEl.textContent = '🎉 Yeni rekor!';
+    recordEl.hidden = false;
+  }else{
+    recordEl.hidden = true;
+  }
+  liveRegion.textContent = 'Süre bitti. ' + raceState.score + ' tarif tamamladın.';
+}
+
+function stopRaceIfActive(){
+  if(raceState.active) endRace();
+}
+
+document.getElementById('raceStartBtn').addEventListener('click', startRaceGame);
+document.getElementById('raceAgainBtn').addEventListener('click', function(){
+  renderRaceIdle();
+});
+
+/* ===================== PERSISTENCE (hot snapshot) ===================== */
+function saveSnapshot(){
+  try{
+    if(window.claude && window.claude.hot && window.claude.hot.snapshot){
+      window.claude.hot.snapshot({ game:state, customStack:customStack });
+    }
+  }catch(e){}
+}
+
+function boot(data){
+  loadSaved();
+  renderSaved();
+  loadStats();
+  loadBestTimes();
+  loadRaceBest();
+  if(data && data.game && typeof data.game.recipeIndex === 'number' && RECIPES[data.game.recipeIndex]){
+    state = data.game;
+    if(typeof state.combo !== 'number') state.combo = 0;
+    if(typeof state.bestCombo !== 'number') state.bestCombo = 0;
+  }else{
+    state.recipeIndex = pickRecipe(-1);
+  }
+  recipeStartTime = Date.now();
+  if(data && Array.isArray(data.customStack)) customStack = data.customStack;
+  render();
+}
+
+try{
+  if(window.claude && window.claude.hot && window.claude.hot.ready){
+    window.claude.hot.ready(boot);
+  }else{
+    boot(window.claude && window.claude.hot ? window.claude.hot.data : null);
+  }
+}catch(e){
+  boot(null);
+}
+
+})();
+</script>
+
+</body>
+</html>
