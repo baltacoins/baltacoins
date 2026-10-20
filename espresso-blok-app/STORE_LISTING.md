@@ -25,7 +25,7 @@ Espresso, süt, köpük, şurup ve daha fazlasını doğru oranda ve doğru
 sırada yerleştirerek gerçek kahve tariflerini adım adım öğren.
 
 🎯 ÖZELLİKLER
-• 38 gerçek kahve tarifi — Ristretto'dan Iced Mocha'ya, Cortado'dan
+• 37 gerçek kahve tarifi — Ristretto'dan Iced Mocha'ya, Cortado'dan
   Eiskaffee'ye kadar klasik ve modern espresso bazlı içecekler
 • Kahveci → Barista → Gurme seviye sistemi — doğru tarif tamamladıkça
   yeni içecekler ve zorluk seviyeleri açılır
