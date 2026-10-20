@@ -83,17 +83,62 @@ jobs:
           path: espresso-blok-app/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
 
-      - name: Commit APK back to repo (so it can be fetched outside Actions storage)
+      - name: Decode release keystore
+        if: ${{ secrets.ESPRESSO_KEYSTORE_BASE64 != '' }}
+        env:
+          ESPRESSO_KEYSTORE_BASE64: ${{ secrets.ESPRESSO_KEYSTORE_BASE64 }}
+        working-directory: espresso-blok-app/android/app
+        run: echo "$ESPRESSO_KEYSTORE_BASE64" | base64 -d > espresso-blok-release.keystore
+
+      - name: Build signed release AAB + APK
+        if: ${{ secrets.ESPRESSO_KEYSTORE_BASE64 != '' }}
+        env:
+          ESPRESSO_KEYSTORE_BASE64: ${{ secrets.ESPRESSO_KEYSTORE_BASE64 }}
+          ESPRESSO_KEYSTORE_PATH: app/espresso-blok-release.keystore
+          ESPRESSO_KEYSTORE_PASSWORD: ${{ secrets.ESPRESSO_KEYSTORE_PASSWORD }}
+          ESPRESSO_KEY_ALIAS: ${{ secrets.ESPRESSO_KEY_ALIAS }}
+          ESPRESSO_KEY_PASSWORD: ${{ secrets.ESPRESSO_KEY_PASSWORD }}
+        working-directory: espresso-blok-app/android
+        run: |
+          set +e
+          OUT=$(./gradlew bundleRelease assembleRelease --no-daemon 2>&1)
+          CODE=$?
+          echo "$OUT"
+          if [ $CODE -ne 0 ]; then
+            ESC=$(echo "$OUT" | tail -c 3500 | sed ':a;N;$!ba;s/\n/%0A/g')
+            echo "::error::release build failed: $ESC"
+          fi
+          exit $CODE
+
+      - name: Upload signed release artifacts
+        if: ${{ secrets.ESPRESSO_KEYSTORE_BASE64 != '' }}
+        env:
+          ESPRESSO_KEYSTORE_BASE64: ${{ secrets.ESPRESSO_KEYSTORE_BASE64 }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: espresso-blok-release
+          path: |
+            espresso-blok-app/android/app/build/outputs/bundle/release/app-release.aab
+            espresso-blok-app/android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+
+      - name: Commit builds back to repo (so they can be fetched outside Actions storage)
         working-directory: .
+        env:
+          ESPRESSO_KEYSTORE_BASE64: ${{ secrets.ESPRESSO_KEYSTORE_BASE64 }}
         run: |
           mkdir -p dist
           cp espresso-blok-app/android/app/build/outputs/apk/debug/app-debug.apk dist/espresso-blok-debug.apk
+          if [ -n "$ESPRESSO_KEYSTORE_BASE64" ]; then
+            cp espresso-blok-app/android/app/build/outputs/bundle/release/app-release.aab dist/espresso-blok-release.aab
+            cp espresso-blok-app/android/app/build/outputs/apk/release/app-release.apk dist/espresso-blok-release.apk
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add dist/espresso-blok-debug.apk
+          git add dist/
           if git diff --cached --quiet; then
-            echo "APK degismedi, commit atlanuyor."
+            echo "Derlenen dosyalar degismedi, commit atlaniyor."
           else
-            git commit -m "dist: espresso-blok-debug.apk guncellendi [skip ci]"
+            git commit -m "dist: derlenen APK/AAB dosyalari guncellendi [skip ci]"
             git push
           fi
