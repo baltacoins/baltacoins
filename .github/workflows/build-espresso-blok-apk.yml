@@ -25,20 +25,53 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
+
+      - name: Show versions
+        run: |
+          node -v
+          npm -v
+          java -version
 
       - name: Install npm dependencies
-        run: npm install
+        run: |
+          set +e
+          OUT=$(npm install 2>&1)
+          CODE=$?
+          echo "$OUT"
+          if [ $CODE -ne 0 ]; then
+            ESC=$(echo "$OUT" | tail -c 3500 | sed ':a;N;$!ba;s/\n/%0A/g')
+            echo "::error::npm install failed: $ESC"
+          fi
+          exit $CODE
 
       - name: Sync Capacitor Android project
-        run: npx cap sync android
+        run: |
+          set +e
+          OUT=$(npx cap sync android 2>&1)
+          CODE=$?
+          echo "$OUT"
+          if [ $CODE -ne 0 ]; then
+            ESC=$(echo "$OUT" | tail -c 3500 | sed ':a;N;$!ba;s/\n/%0A/g')
+            echo "::error::cap sync failed: $ESC"
+          fi
+          exit $CODE
 
       - name: Make gradlew executable
         run: chmod +x android/gradlew
 
       - name: Build debug APK
         working-directory: espresso-blok-app/android
-        run: ./gradlew assembleDebug --no-daemon
+        run: |
+          set +e
+          OUT=$(./gradlew assembleDebug --no-daemon 2>&1)
+          CODE=$?
+          echo "$OUT"
+          if [ $CODE -ne 0 ]; then
+            ESC=$(echo "$OUT" | tail -c 3500 | sed ':a;N;$!ba;s/\n/%0A/g')
+            echo "::error::gradle build failed: $ESC"
+          fi
+          exit $CODE
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
