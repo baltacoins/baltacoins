@@ -135,5 +135,12 @@ jobs:
             echo "Derlenen dosyalar degismedi, commit atlaniyor."
           else
             git commit -m "dist: derlenen APK/AAB dosyalari guncellendi [skip ci]"
-            git push
+            for i in 1 2 3 4 5; do
+              if git push; then
+                break
+              fi
+              echo "push basarisiz (muhtemelen ayni anda baska bir calisma push etti), rebase edip tekrar deneniyor..."
+              git pull --rebase origin main
+              sleep 3
+            done
           fi
