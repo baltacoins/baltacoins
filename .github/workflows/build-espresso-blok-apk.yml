@@ -122,25 +122,43 @@ jobs:
       - name: Commit builds back to repo (so they can be fetched outside Actions storage)
         working-directory: .
         run: |
-          mkdir -p dist
-          cp espresso-blok-app/android/app/build/outputs/apk/debug/app-debug.apk dist/espresso-blok-debug.apk
+          set +e
+          mkdir -p /tmp/dist-out
+          cp espresso-blok-app/android/app/build/outputs/apk/debug/app-debug.apk /tmp/dist-out/espresso-blok-debug.apk
           if [ -n "$ESPRESSO_KEYSTORE_BASE64" ]; then
-            cp espresso-blok-app/android/app/build/outputs/bundle/release/app-release.aab dist/espresso-blok-release.aab
-            cp espresso-blok-app/android/app/build/outputs/apk/release/app-release.apk dist/espresso-blok-release.apk
+            cp espresso-blok-app/android/app/build/outputs/bundle/release/app-release.aab /tmp/dist-out/espresso-blok-release.aab
+            cp espresso-blok-app/android/app/build/outputs/apk/release/app-release.apk /tmp/dist-out/espresso-blok-release.apk
           fi
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add dist/
-          if git diff --cached --quiet; then
-            echo "Derlenen dosyalar degismedi, commit atlaniyor."
-          else
+
+          SUCCESS=0
+          for i in 1 2 3 4 5; do
+            git fetch origin main && git reset --hard origin/main
+            mkdir -p dist
+            cp /tmp/dist-out/*.apk /tmp/dist-out/*.aab dist/ 2>/dev/null
+            cp /tmp/dist-out/espresso-blok-debug.apk dist/espresso-blok-debug.apk
+            if [ -n "$ESPRESSO_KEYSTORE_BASE64" ]; then
+              cp /tmp/dist-out/espresso-blok-release.aab dist/espresso-blok-release.aab
+              cp /tmp/dist-out/espresso-blok-release.apk dist/espresso-blok-release.apk
+            fi
+            git add dist/
+            if git diff --cached --quiet; then
+              echo "Derlenen dosyalar degismedi, commit atlaniyor."
+              SUCCESS=1
+              break
+            fi
             git commit -m "dist: derlenen APK/AAB dosyalari guncellendi [skip ci]"
-            for i in 1 2 3 4 5; do
-              if git push; then
-                break
-              fi
-              echo "push basarisiz (muhtemelen ayni anda baska bir calisma push etti), rebase edip tekrar deneniyor..."
-              git pull --rebase origin main
-              sleep 3
-            done
+            if git push origin main; then
+              SUCCESS=1
+              break
+            fi
+            echo "push basarisiz (muhtemelen ayni anda baska bir calisma push etti), $((i*3))s bekleyip tekrar deneniyor..."
+            sleep $((i*3))
+          done
+
+          if [ "$SUCCESS" != "1" ]; then
+            echo "::error::dist/ push 5 denemeden sonra basarisiz oldu."
+            exit 1
           fi
+          exit 0
