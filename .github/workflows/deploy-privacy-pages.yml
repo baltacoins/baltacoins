@@ -27,8 +27,12 @@ jobs:
       - uses: actions/configure-pages@v5
         with:
           enablement: true
+      - name: Assemble site with privacy/ subpath
+        run: |
+          mkdir -p pages-dist/privacy
+          cp -r privacy/. pages-dist/privacy/
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: 'privacy'
+          path: 'pages-dist'
       - id: deployment
         uses: actions/deploy-pages@v4
