@@ -96,7 +96,7 @@ jobs:
       - name: Build signed release AAB + APK
         if: ${{ env.ESPRESSO_KEYSTORE_BASE64 != '' }}
         env:
-          ESPRESSO_KEYSTORE_PATH: app/espresso-blok-release.keystore
+          ESPRESSO_KEYSTORE_PATH: espresso-blok-release.keystore
         working-directory: espresso-blok-app/android
         run: |
           set +e
