@@ -96,6 +96,14 @@ body{
 .ticket-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;align-items:center}
 .ticket-actions .spacer{flex:1}
 
+.miniTicket{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;display:flex;align-items:center;gap:10px;
+  background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:9px 14px;
+  box-shadow:0 4px 14px rgba(42,27,18,.12)}
+.miniTicket-label{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:10px;color:var(--muted);
+  letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.miniTicket-name{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:16px;color:var(--ink);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
 .btn{
   font-family:'Public Sans',sans-serif;font-weight:600;font-size:13px;border:none;border-radius:9px;
   padding:10px 16px;cursor:pointer;color:#fff;background:var(--accent);transition:filter .12s,transform .08s;
@@ -232,6 +240,10 @@ body{
   background:var(--surface);color:var(--muted);border-radius:20px;padding:7px 14px;cursor:pointer}
 .bookFilterBtn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .bookList{display:flex;flex-direction:column;gap:10px}
+.modeFilters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.modeFilterBtn{font-family:'Public Sans',sans-serif;font-weight:600;font-size:11.5px;border:1px solid var(--line);
+  background:var(--surface);color:var(--muted);border-radius:20px;padding:7px 14px;cursor:pointer}
+.modeFilterBtn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .bookTierHead{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:15px;color:var(--ink);
   margin-top:10px;padding-bottom:4px;border-bottom:2px solid var(--accent);display:inline-block}
 .bookTierHead:first-child{margin-top:0}
@@ -353,6 +365,12 @@ body{
   <!-- ===================== GAME PANEL ===================== -->
   <div class="panel active" id="panelGame">
 
+    <div class="modeFilters">
+      <button class="modeFilterBtn active" type="button" data-tempfilter="all">Tümü</button>
+      <button class="modeFilterBtn" type="button" data-tempfilter="hot">☕ Sadece Sıcak</button>
+      <button class="modeFilterBtn" type="button" data-tempfilter="cold">🧊 Sadece Soğuk</button>
+    </div>
+
     <div class="ticket" id="ticket">
       <div class="ticket-head">
         <span id="recipeCounter">SİPARİŞ</span>
@@ -366,6 +384,11 @@ body{
         <div class="spacer"></div>
         <button class="btn" id="skipBtn" type="button">Yeni Tarif</button>
       </div>
+    </div>
+
+    <div class="miniTicket" id="miniTicket">
+      <span class="miniTicket-label">Hazırlanan</span>
+      <span class="miniTicket-name" id="miniTicketName">—</span>
     </div>
 
     <div class="workspace">
@@ -494,6 +517,11 @@ body{
   <!-- ===================== GUESS MODE PANEL ===================== -->
   <div class="panel" id="panelGuess">
     <div class="bookIntro">Bardağa bak, bloklara dokunma — hangi tarif olduğunu tahmin et. Renk ve katman sayısı tek ipucun.</div>
+    <div class="modeFilters">
+      <button class="modeFilterBtn active" type="button" data-tempfilter="all">Tümü</button>
+      <button class="modeFilterBtn" type="button" data-tempfilter="hot">☕ Sadece Sıcak</button>
+      <button class="modeFilterBtn" type="button" data-tempfilter="cold">🧊 Sadece Soğuk</button>
+    </div>
     <div class="guessScoreboard">
       <span id="guessScoreVal">0</span>/<span id="guessTotalVal">0</span> doğru tahmin
     </div>
@@ -526,6 +554,11 @@ body{
   <!-- ===================== RACE MODE PANEL ===================== -->
   <div class="panel" id="panelRace">
     <div class="bookIntro">Zamana karşı yarış — süre bitmeden olabildiğince çok tarif tamamla. Sıra burada da önemli, ama bu kez saat işliyor.</div>
+    <div class="modeFilters">
+      <button class="modeFilterBtn active" type="button" data-tempfilter="all">Tümü</button>
+      <button class="modeFilterBtn" type="button" data-tempfilter="hot">☕ Sadece Sıcak</button>
+      <button class="modeFilterBtn" type="button" data-tempfilter="cold">🧊 Sadece Soğuk</button>
+    </div>
 
     <div class="raceStartWrap" id="raceStartWrap">
       <div class="big">60 saniyen var</div>
@@ -701,6 +734,44 @@ var RECIPES = [
   { name:"Red Eye",            parts:["espresso","filtre_kahve"], tier:3, cup:{type:"ceramicMug", min:300, max:400} },
   { name:"Black Eye",          parts:["espresso","espresso","filtre_kahve"], tier:3, cup:{type:"ceramicMug", min:300, max:400} }
 ];
+
+/* ---------- Sıcak / Soğuk filtresi (tüm modlar) ---------- */
+var TEMP_FILTER_KEY = 'espressoBlokTempFilter';
+var tempFilter = 'all';
+try{
+  var savedTempFilter = localStorage.getItem(TEMP_FILTER_KEY);
+  if(savedTempFilter === 'hot' || savedTempFilter === 'cold') tempFilter = savedTempFilter;
+}catch(e){}
+
+function filteredIndexes(){
+  return RECIPES.map(function(_,i){ return i; }).filter(function(i){
+    if(tempFilter === 'hot') return !RECIPES[i].iced;
+    if(tempFilter === 'cold') return !!RECIPES[i].iced;
+    return true;
+  });
+}
+
+function applyTempFilterUI(){
+  Array.prototype.slice.call(document.querySelectorAll('.modeFilterBtn')).forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-tempfilter') === tempFilter);
+  });
+}
+
+function setTempFilter(val){
+  if(val === tempFilter) return;
+  tempFilter = val;
+  try{ localStorage.setItem(TEMP_FILTER_KEY, val); }catch(e){}
+  applyTempFilterUI();
+  if(panels.game.classList.contains('active')){
+    startRecipe(pickRecipe(state.recipeIndex));
+  }
+  if(panels.race.classList.contains('active') && raceState.active){
+    startRaceRecipe(pickRaceRecipe(raceState.recipeIndex));
+  }
+  if(panels.guess.classList.contains('active')){
+    startGuessRound();
+  }
+}
 
 var BADGES = [
   { id:"ilk_adim",    icon:"👣", name:"İlk Adım",            desc:"İlk tarifini tamamla.",
@@ -932,6 +1003,7 @@ tabButtons.forEach(function(btn){
 var towerEl = document.getElementById('tower');
 var towerBox = document.getElementById('towerBox');
 var targetName = document.getElementById('targetName');
+var miniTicketName = document.getElementById('miniTicketName');
 var targetProgress = document.getElementById('targetProgress');
 var successBox = document.getElementById('successBox');
 var successLabel = document.getElementById('successLabel');
@@ -1002,9 +1074,12 @@ function renderComboBadge(){
 
 function pickRecipe(excludeIndex){
   var maxTier = unlockedTierId(state.score);
-  var pool = RECIPES.map(function(_,i){return i;}).filter(function(i){
+  var allowed = filteredIndexes();
+  var pool = allowed.filter(function(i){
     return i !== excludeIndex && RECIPES[i].tier <= maxTier;
   });
+  if(pool.length === 0) pool = allowed.filter(function(i){return i !== excludeIndex;});
+  if(pool.length === 0) pool = allowed;
   if(pool.length === 0) pool = RECIPES.map(function(_,i){return i;}).filter(function(i){return i !== excludeIndex;});
   return pool[Math.floor(Math.random()*pool.length)];
 }
@@ -1026,6 +1101,7 @@ function currentRecipe(){ return RECIPES[state.recipeIndex]; }
 function render(){
   var r = currentRecipe();
   targetName.innerHTML = '<span>' + r.name + '</span><span class="tempBadge ' + (r.iced ? 'cold">SOĞUK' : 'hot">SICAK') + '</span>';
+  miniTicketName.textContent = r.name + (r.iced ? ' (Soğuk)' : ' (Sıcak)');
   recipeCounter.textContent = 'SİPARİŞ #' + String(state.total + 1).padStart(2,'0');
   scoreVal.textContent = state.score;
   totalVal.textContent = state.total;
@@ -1183,6 +1259,11 @@ document.getElementById('nextBtn').addEventListener('click', function(){
   startRecipe(pickRecipe(state.recipeIndex));
   saveSnapshot();
 });
+
+Array.prototype.slice.call(document.querySelectorAll('.modeFilterBtn')).forEach(function(btn){
+  btn.addEventListener('click', function(){ setTempFilter(btn.getAttribute('data-tempfilter')); });
+});
+applyTempFilterUI();
 
 /* ===================== RECIPE BOOK ===================== */
 var bookList = document.getElementById('bookList');
@@ -1423,7 +1504,9 @@ function renderTowerBlocksBlind(containerEl, parts){
 
 function startGuessRound(){
   var maxTier = unlockedTierId(state.score);
-  var pool = RECIPES.filter(function(r){ return r.tier <= maxTier; });
+  var allowed = filteredIndexes().map(function(i){ return RECIPES[i]; });
+  var pool = allowed.filter(function(r){ return r.tier <= maxTier; });
+  if(pool.length < 4) pool = allowed.slice();
   if(pool.length < 4) pool = RECIPES.slice();
   guessCurrent = pool[Math.floor(Math.random() * pool.length)];
   guessAnswered = false;
@@ -1537,9 +1620,12 @@ function renderRaceIdle(){
 
 function pickRaceRecipe(excludeIndex){
   var maxTier = unlockedTierId(state.score);
-  var pool = RECIPES.map(function(_,i){return i;}).filter(function(i){
+  var allowed = filteredIndexes();
+  var pool = allowed.filter(function(i){
     return i !== excludeIndex && RECIPES[i].tier <= maxTier;
   });
+  if(pool.length === 0) pool = allowed.filter(function(i){return i !== excludeIndex;});
+  if(pool.length === 0) pool = allowed;
   if(pool.length === 0) pool = RECIPES.map(function(_,i){return i;}).filter(function(i){return i !== excludeIndex;});
   return pool[Math.floor(Math.random()*pool.length)];
 }
