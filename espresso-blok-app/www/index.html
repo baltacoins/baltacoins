@@ -1079,16 +1079,32 @@ function renderComboBadge(){
   }
 }
 
+/* Art arda / kisa aralikla ayni tarifin tekrar cikmasini onlemek icin
+   son secilenleri hafizada tutan paylasilan secim yardimcisi. */
+var RECENT_RECIPE_HISTORY_MAX = 6;
+var recentRecipeHistory = [];
+
+function pickAvoidingRecent(poolIndexes, excludeIndex){
+  var pool = poolIndexes.filter(function(i){ return i !== excludeIndex; });
+  if(pool.length === 0) pool = poolIndexes;
+  if(pool.length === 0) return excludeIndex;
+  var historyLimit = Math.min(recentRecipeHistory.length, Math.max(0, pool.length - 1));
+  var avoidSet = historyLimit > 0 ? recentRecipeHistory.slice(recentRecipeHistory.length - historyLimit) : [];
+  var filtered = pool.filter(function(i){ return avoidSet.indexOf(i) === -1; });
+  if(filtered.length === 0) filtered = pool;
+  var choice = filtered[Math.floor(Math.random()*filtered.length)];
+  recentRecipeHistory.push(choice);
+  if(recentRecipeHistory.length > RECENT_RECIPE_HISTORY_MAX) recentRecipeHistory.shift();
+  return choice;
+}
+
 function pickRecipe(excludeIndex){
   var maxTier = unlockedTierId(state.score);
   var allowed = filteredIndexes();
-  var pool = allowed.filter(function(i){
-    return i !== excludeIndex && RECIPES[i].tier <= maxTier;
-  });
-  if(pool.length === 0) pool = allowed.filter(function(i){return i !== excludeIndex;});
+  var pool = allowed.filter(function(i){ return RECIPES[i].tier <= maxTier; });
   if(pool.length === 0) pool = allowed;
-  if(pool.length === 0) pool = RECIPES.map(function(_,i){return i;}).filter(function(i){return i !== excludeIndex;});
-  return pool[Math.floor(Math.random()*pool.length)];
+  if(pool.length === 0) pool = RECIPES.map(function(_,i){return i;});
+  return pickAvoidingRecent(pool, excludeIndex);
 }
 
 function startRecipe(index){
@@ -1511,11 +1527,14 @@ function renderTowerBlocksBlind(containerEl, parts){
 
 function startGuessRound(){
   var maxTier = unlockedTierId(state.score);
-  var allowed = filteredIndexes().map(function(i){ return RECIPES[i]; });
-  var pool = allowed.filter(function(r){ return r.tier <= maxTier; });
-  if(pool.length < 4) pool = allowed.slice();
-  if(pool.length < 4) pool = RECIPES.slice();
-  guessCurrent = pool[Math.floor(Math.random() * pool.length)];
+  var allowedIdx = filteredIndexes();
+  var poolIdx = allowedIdx.filter(function(i){ return RECIPES[i].tier <= maxTier; });
+  if(poolIdx.length < 4) poolIdx = allowedIdx.slice();
+  if(poolIdx.length < 4) poolIdx = RECIPES.map(function(_,i){return i;});
+  var prevIdx = guessCurrent ? RECIPES.indexOf(guessCurrent) : -1;
+  var chosenIdx = pickAvoidingRecent(poolIdx, prevIdx);
+  var pool = poolIdx.map(function(i){ return RECIPES[i]; });
+  guessCurrent = RECIPES[chosenIdx];
   guessAnswered = false;
   guessRevealEl.hidden = true;
   guessRevealEl.innerHTML = '';
@@ -1628,13 +1647,10 @@ function renderRaceIdle(){
 function pickRaceRecipe(excludeIndex){
   var maxTier = unlockedTierId(state.score);
   var allowed = filteredIndexes();
-  var pool = allowed.filter(function(i){
-    return i !== excludeIndex && RECIPES[i].tier <= maxTier;
-  });
-  if(pool.length === 0) pool = allowed.filter(function(i){return i !== excludeIndex;});
+  var pool = allowed.filter(function(i){ return RECIPES[i].tier <= maxTier; });
   if(pool.length === 0) pool = allowed;
-  if(pool.length === 0) pool = RECIPES.map(function(_,i){return i;}).filter(function(i){return i !== excludeIndex;});
-  return pool[Math.floor(Math.random()*pool.length)];
+  if(pool.length === 0) pool = RECIPES.map(function(_,i){return i;});
+  return pickAvoidingRecent(pool, excludeIndex);
 }
 
 function startRaceRecipe(index){
