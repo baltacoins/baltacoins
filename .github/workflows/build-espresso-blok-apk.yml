@@ -97,6 +97,7 @@ jobs:
         if: ${{ env.ESPRESSO_KEYSTORE_BASE64 != '' }}
         env:
           ESPRESSO_KEYSTORE_PATH: espresso-blok-release.keystore
+          ESPRESSO_VERSION_CODE: ${{ github.run_number }}
         working-directory: espresso-blok-app/android
         run: |
           set +e
