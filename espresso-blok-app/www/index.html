@@ -636,49 +636,49 @@ body{
 var INGREDIENTS = {
   ristretto:      { label:"Ristretto",            meta:"15-20 ml",bg:"#FF0000", fg:"#FFFFFF", amount:15,  unit:"ml", group:"espresso",
                     spec:"10gr kahve, 9 bar basınç, 15-20ml çıktı.",
-                    fact:"Aynı 10gr kahve, aynı 9 bar basınç — süre kısaltılıp su azaltılınca yoğun, az acı bir çekim çıkıyor." },
+                    fact:"Aynı 10gr kahve, aynı 9 bar basınç — süre kısaltılıp su azaltılınca yoğun, az acı bir çekim çıkıyor.", kcal:2 },
   lungo:          { label:"Lungo",                meta:"60 ml",   bg:"#FFE4C4", fg:"#4A3B2E", amount:60,  unit:"ml", group:"espresso",
                     spec:"10gr kahve, 9 bar basınç, 60ml çıktı.",
-                    fact:"Aynı kahve dozu, daha uzun süzülüyor — daha fazla su, daha hafif gövde ve daha ılımlı bir tat." },
+                    fact:"Aynı kahve dozu, daha uzun süzülüyor — daha fazla su, daha hafif gövde ve daha ılımlı bir tat.", kcal:4 },
   espresso:       { label:"Single Espresso",      meta:"30 ml",   bg:"#B22222", fg:"#FFFFFF", amount:30,  unit:"ml", shot:true, group:"espresso",
                     spec:"10gr kahve, 9 bar basınç, 30ml çıktı.",
-                    fact:"10gr öğütülmüş kahve, 9 bar basınç, 25–30 saniye, 30ml çıktı — tüm tariflerin çıkış noktası." },
+                    fact:"10gr öğütülmüş kahve, 9 bar basınç, 25–30 saniye, 30ml çıktı — tüm tariflerin çıkış noktası.", kcal:3 },
   sicak_su:       { label:"Sıcak Su",             meta:"150 ml",  bg:"#00FFFF", fg:"#0B4A4A", amount:150, unit:"ml", group:"milk",
-                    fact:"Espressoyu inceltir, kafein miktarı aynı kalır ama tat ve gövde daha hafif hissedilir." },
+                    fact:"Espressoyu inceltir, kafein miktarı aynı kalır ama tat ve gövde daha hafif hissedilir.", kcal:0 },
   duz_sut:        { label:"Düz Sıcak Süt",        meta:"120 ml",  bg:"#708090", fg:"#FFFFFF", amount:120, unit:"ml", group:"milk",
-                    fact:"Köpüksüz, kremasız — buharla ısıtılmış süt espressoyu yumuşatır, dokusunu değiştirmez." },
+                    fact:"Köpüksüz, kremasız — buharla ısıtılmış süt espressoyu yumuşatır, dokusunu değiştirmez.", kcal:70 },
   kopuklu_150:    { label:"Köpüklü Süt",          meta:"150 ml",  bg:"#4682B4", fg:"#FFFFFF", amount:150, unit:"ml", group:"milk",
-                    fact:"Süt buharla köpürtülüp mikro-köpük dokusuna getirilir — espressonun üstünde hacim oluşturur." },
+                    fact:"Süt buharla köpürtülüp mikro-köpük dokusuna getirilir — espressonun üstünde hacim oluşturur.", kcal:75 },
   kopuklu_180:    { label:"Köpüklü Süt",          meta:"180 ml",  bg:"#4682B4", fg:"#FFFFFF", amount:180, unit:"ml", group:"milk",
-                    fact:"Aynı köpüklü süt, daha yüksek hacimde — espressoyu ince bir iz halinde ortada bırakır." },
+                    fact:"Aynı köpüklü süt, daha yüksek hacimde — espressoyu ince bir iz halinde ortada bırakır.", kcal:90 },
   kremali_60:     { label:"Kremalı Süt",          meta:"60 ml",   bg:"#0000CD", fg:"#FFFFFF", amount:60,  unit:"ml", group:"milk",
-                    fact:"Süt, köpük yerine kadifemsi bir krema dokusuna çekilir — daha yoğun ve pürüzsüz bir hissiyat." },
+                    fact:"Süt, köpük yerine kadifemsi bir krema dokusuna çekilir — daha yoğun ve pürüzsüz bir hissiyat.", kcal:40 },
   kremali_130:    { label:"Kremalı Süt",          meta:"130 ml",  bg:"#0000CD", fg:"#FFFFFF", amount:130, unit:"ml", group:"milk",
-                    fact:"Aynı kremalı süt, daha yüksek hacimde — çikolatayla birleştiğinde gövdeyi dengeler." },
+                    fact:"Aynı kremalı süt, daha yüksek hacimde — çikolatayla birleştiğinde gövdeyi dengeler.", kcal:90 },
   kremali_150:    { label:"Kremalı Süt",          meta:"150 ml",  bg:"#0000CD", fg:"#FFFFFF", amount:150, unit:"ml", group:"milk",
-                    fact:"Aynı kremalı süt, Latte ölçüsünde — köpüklü süt değil, pürüzsüz ve kadifemsi bir gövde verir." },
+                    fact:"Aynı kremalı süt, Latte ölçüsünde — köpüklü süt değil, pürüzsüz ve kadifemsi bir gövde verir.", kcal:105 },
   cikolata:       { label:"Çikolata",             meta:"20 gr",   bg:"#EE82EE", fg:"#3A1A3A", amount:20,  unit:"gr", group:"garnish",
-                    fact:"20gr gerçek çikolata — süte eklenmez, kendi başına bir parça: tarife bağlı kalmak için ayrı tutulur." },
+                    fact:"20gr gerçek çikolata — süte eklenmez, kendi başına bir parça: tarife bağlı kalmak için ayrı tutulur.", kcal:80 },
   kasik_kopuk:    { label:"1 Kaşık Köpüklü Süt",  meta:"garnitür",bg:"#ADD8E6", fg:"#0B2A3A", amount:5,   unit:"ml", group:"garnish",
-                    fact:"Tam ölçü süt bloğu değil — küçük bir kaşıklık, dekoratif ve hafif bir dokunuş." },
+                    fact:"Tam ölçü süt bloğu değil — küçük bir kaşıklık, dekoratif ve hafif bir dokunuş.", kcal:5 },
   kasik_dondurma: { label:"1 Kaşık Dondurma",     meta:"garnitür",bg:"#BDB76B", fg:"#3A3520", amount:30,  unit:"gr", group:"garnish",
-                    fact:"Sıcak espressoyla temas edince yavaşça erir — sıcak/soğuk kontrastı tarifin asıl fikridir." },
+                    fact:"Sıcak espressoyla temas edince yavaşça erir — sıcak/soğuk kontrastı tarifin asıl fikridir.", kcal:60 },
   kasik_krem_santi:{ label:"1 Kaşık Krem Şanti",  meta:"garnitür",bg:"#FFF8DC", fg:"#4A3B2E", amount:5,   unit:"ml", group:"garnish",
-                    fact:"Çırpılmış krema — kaşıkla eklenen hafif bir garnitür, kalıcı değil, tamamen dekoratif." },
+                    fact:"Çırpılmış krema — kaşıkla eklenen hafif bir garnitür, kalıcı değil, tamamen dekoratif.", kcal:15 },
   kondanse_sut:   { label:"Kondanse Süt",         meta:"30 ml",   bg:"#D2A679", fg:"#3A2410", amount:30,  unit:"ml", group:"garnish",
-                    fact:"Şekerle kıvamlaştırılmış süt — İspanya ve Filipinler kökenli, dipte kalan tatlı bir katman." },
+                    fact:"Şekerle kıvamlaştırılmış süt — İspanya ve Filipinler kökenli, dipte kalan tatlı bir katman.", kcal:95 },
   buz:            { label:"Buz",                  meta:"100 gr",  bg:"#CFEFFF", fg:"#0B3B55", amount:100, unit:"gr", group:"ice",
-                    fact:"Soğuk içeceklerde buz genelde en altta — sıcak espresso üstüne dökülünce hemen erimez, içecek daha uzun soğuk kalır." },
+                    fact:"Soğuk içeceklerde buz genelde en altta — sıcak espresso üstüne dökülünce hemen erimez, içecek daha uzun soğuk kalır.", kcal:0 },
   soguk_su:       { label:"Soğuk Su",             meta:"120 ml",  bg:"#B3E5FC", fg:"#0B3B55", amount:120, unit:"ml", group:"ice",
-                    fact:"Oda sıcaklığında ya da buzdolabı suyu — Americano'yu sıcak tutmadan inceltir, buzla birlikte serinletir." },
+                    fact:"Oda sıcaklığında ya da buzdolabı suyu — Americano'yu sıcak tutmadan inceltir, buzla birlikte serinletir.", kcal:0 },
   vanilya_surubu: { label:"Vanilya Şurubu",       meta:"15 ml",   bg:"#F5DEB3", fg:"#5A4A2A", amount:15,  unit:"ml", group:"garnish",
-                    fact:"Espressoyla birlikte bardağın dibine eklenir, karışınca tatlandırır — şuruplar barista dilinde 'pump' ile ölçülür." },
+                    fact:"Espressoyla birlikte bardağın dibine eklenir, karışınca tatlandırır — şuruplar barista dilinde 'pump' ile ölçülür.", kcal:40 },
   karamel_sos:    { label:"Karamel Sos",          meta:"10 ml",   bg:"#C68E3F", fg:"#3A2410", amount:10,  unit:"ml", group:"garnish",
-                    fact:"Köpüğün üstüne zigzag şeklinde damlatılır — tat kadar görünüm için de eklenen klasik bir kapanış dokunuşu." },
+                    fact:"Köpüğün üstüne zigzag şeklinde damlatılır — tat kadar görünüm için de eklenen klasik bir kapanış dokunuşu.", kcal:35 },
   esmer_seker:    { label:"Esmer Şeker",          meta:"5 gr",    bg:"#8B5A2B", fg:"#FFFFFF", amount:5,   unit:"gr", group:"garnish",
-                    fact:"Küba kahvesinin imzası — espressoyla birlikte sertçe çırpılınca üstte tatlı, köpüklü bir 'espuma' tabakası oluşturur." },
+                    fact:"Küba kahvesinin imzası — espressoyla birlikte sertçe çırpılınca üstte tatlı, köpüklü bir 'espuma' tabakası oluşturur.", kcal:20 },
   filtre_kahve:   { label:"Filtre Kahve",         meta:"150 ml",  bg:"#5C4033", fg:"#FFFFFF", amount:150, unit:"ml", group:"milk",
-                    fact:"Damla damla süzülen, espressodan çok daha hafif gövdeli bir demleme — espressoyla karışınca kafeini ikiye katlar." }
+                    fact:"Damla damla süzülen, espressodan çok daha hafif gövdeli bir demleme — espressoyla karışınca kafeini ikiye katlar.", kcal:2 }
 };
 
 var TIERS = [
@@ -841,19 +841,24 @@ function showToast(el, text, ms){
 
 /* ---------- shared helpers ---------- */
 function computeTotals(parts){
-  var t = { ml:0, gr:0, shots:0 };
+  var t = { ml:0, gr:0, shots:0, kcal:0 };
   parts.forEach(function(id){
     var ing = INGREDIENTS[id];
     if(ing.unit === 'ml') t.ml += ing.amount;
     if(ing.unit === 'gr') t.gr += ing.amount;
     if(ing.shot) t.shots += 1;
+    t.kcal += ing.kcal || 0;
   });
   return t;
+}
+function recipeKcal(parts){
+  return parts.reduce(function(sum, id){ return sum + (INGREDIENTS[id].kcal || 0); }, 0);
 }
 function totalsLineText(t){
   var bits = ['Toplam sıvı: ' + t.ml + 'ml'];
   if(t.gr > 0) bits.push('katkı: ' + t.gr + 'gr');
   if(t.shots > 0) bits.push(t.shots + ' doz espresso');
+  bits.push('🔥 ' + t.kcal + ' kcal');
   return bits.join(' · ');
 }
 function renderTowerBlocks(containerEl, parts, pulseLast){
@@ -1309,7 +1314,7 @@ function renderBook(){
     head.type = 'button';
     head.className = 'bookHead';
     head.innerHTML = '<span class="nm">' + r.name + '</span><span class="meta"><span class="tempBadge ' +
-      (r.iced ? 'cold">SOĞUK' : 'hot">SICAK') + '</span> ' + r.parts.length + ' parça</span><span class="chev">▾</span>';
+      (r.iced ? 'cold">SOĞUK' : 'hot">SICAK') + '</span> ' + r.parts.length + ' parça · 🔥 ' + recipeKcal(r.parts) + ' kcal</span><span class="chev">▾</span>';
     head.addEventListener('click', function(){
       bookOpen = (bookOpen === idx) ? -1 : idx;
       renderBook();
