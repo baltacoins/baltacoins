@@ -10,7 +10,8 @@ android {
         // versionCode her CI derlemesinde GitHub Actions calisma numarasindan otomatik artar,
         // boylece Play Console'a her yuklemede "sürüm kodu daha önce kullanıldı" hatasi alinmaz.
         // Yerel derlemede (ortam degiskeni yoksa) 1 kullanilir.
-        versionCode (System.getenv("ESPRESSO_VERSION_CODE") ?: "1") as Integer
+        def espressoVersionCodeEnv = System.getenv("ESPRESSO_VERSION_CODE")
+        versionCode espressoVersionCodeEnv ? espressoVersionCodeEnv.toInteger() : 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
