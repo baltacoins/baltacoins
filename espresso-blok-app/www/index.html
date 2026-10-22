@@ -366,9 +366,10 @@ body{
   <div class="panel active" id="panelGame">
 
     <div class="modeFilters">
-      <button class="modeFilterBtn active" type="button" data-tempfilter="all">Tümü</button>
-      <button class="modeFilterBtn" type="button" data-tempfilter="hot">☕ Sadece Sıcak</button>
-      <button class="modeFilterBtn" type="button" data-tempfilter="cold">🧊 Sadece Soğuk</button>
+      <button class="modeFilterBtn active" type="button" data-tierfilter="all">Tümü</button>
+      <button class="modeFilterBtn" type="button" data-tierfilter="1">Kahveci</button>
+      <button class="modeFilterBtn" type="button" data-tierfilter="2">Barista</button>
+      <button class="modeFilterBtn" type="button" data-tierfilter="3">Gurme</button>
     </div>
 
     <div class="ticket" id="ticket">
@@ -518,9 +519,10 @@ body{
   <div class="panel" id="panelGuess">
     <div class="bookIntro">Bardağa bak, bloklara dokunma — hangi tarif olduğunu tahmin et. Renk ve katman sayısı tek ipucun.</div>
     <div class="modeFilters">
-      <button class="modeFilterBtn active" type="button" data-tempfilter="all">Tümü</button>
-      <button class="modeFilterBtn" type="button" data-tempfilter="hot">☕ Sadece Sıcak</button>
-      <button class="modeFilterBtn" type="button" data-tempfilter="cold">🧊 Sadece Soğuk</button>
+      <button class="modeFilterBtn active" type="button" data-tierfilter="all">Tümü</button>
+      <button class="modeFilterBtn" type="button" data-tierfilter="1">Kahveci</button>
+      <button class="modeFilterBtn" type="button" data-tierfilter="2">Barista</button>
+      <button class="modeFilterBtn" type="button" data-tierfilter="3">Gurme</button>
     </div>
     <div class="guessScoreboard">
       <span id="guessScoreVal">0</span>/<span id="guessTotalVal">0</span> doğru tahmin
@@ -555,9 +557,10 @@ body{
   <div class="panel" id="panelRace">
     <div class="bookIntro">Zamana karşı yarış — süre bitmeden olabildiğince çok tarif tamamla. Sıra burada da önemli, ama bu kez saat işliyor.</div>
     <div class="modeFilters">
-      <button class="modeFilterBtn active" type="button" data-tempfilter="all">Tümü</button>
-      <button class="modeFilterBtn" type="button" data-tempfilter="hot">☕ Sadece Sıcak</button>
-      <button class="modeFilterBtn" type="button" data-tempfilter="cold">🧊 Sadece Soğuk</button>
+      <button class="modeFilterBtn active" type="button" data-tierfilter="all">Tümü</button>
+      <button class="modeFilterBtn" type="button" data-tierfilter="1">Kahveci</button>
+      <button class="modeFilterBtn" type="button" data-tierfilter="2">Barista</button>
+      <button class="modeFilterBtn" type="button" data-tierfilter="3">Gurme</button>
     </div>
 
     <div class="raceStartWrap" id="raceStartWrap">
@@ -735,33 +738,32 @@ var RECIPES = [
   { name:"Black Eye",          parts:["espresso","espresso","filtre_kahve"], tier:3, cup:{type:"ceramicMug", min:300, max:400} }
 ];
 
-/* ---------- Sıcak / Soğuk filtresi (tüm modlar) ---------- */
-var TEMP_FILTER_KEY = 'espressoBlokTempFilter';
-var tempFilter = 'all';
+/* ---------- Kahveci / Barista / Gurme filtresi (tüm modlar) ---------- */
+var TIER_FILTER_KEY = 'espressoBlokTierFilter';
+var tierFilter = 'all';
 try{
-  var savedTempFilter = localStorage.getItem(TEMP_FILTER_KEY);
-  if(savedTempFilter === 'hot' || savedTempFilter === 'cold') tempFilter = savedTempFilter;
+  var savedTierFilter = localStorage.getItem(TIER_FILTER_KEY);
+  if(savedTierFilter === '1' || savedTierFilter === '2' || savedTierFilter === '3') tierFilter = savedTierFilter;
 }catch(e){}
 
 function filteredIndexes(){
   return RECIPES.map(function(_,i){ return i; }).filter(function(i){
-    if(tempFilter === 'hot') return !RECIPES[i].iced;
-    if(tempFilter === 'cold') return !!RECIPES[i].iced;
-    return true;
+    if(tierFilter === 'all') return true;
+    return String(RECIPES[i].tier) === tierFilter;
   });
 }
 
-function applyTempFilterUI(){
+function applyTierFilterUI(){
   Array.prototype.slice.call(document.querySelectorAll('.modeFilterBtn')).forEach(function(b){
-    b.classList.toggle('active', b.getAttribute('data-tempfilter') === tempFilter);
+    b.classList.toggle('active', b.getAttribute('data-tierfilter') === tierFilter);
   });
 }
 
-function setTempFilter(val){
-  if(val === tempFilter) return;
-  tempFilter = val;
-  try{ localStorage.setItem(TEMP_FILTER_KEY, val); }catch(e){}
-  applyTempFilterUI();
+function setTierFilter(val){
+  if(val === tierFilter) return;
+  tierFilter = val;
+  try{ localStorage.setItem(TIER_FILTER_KEY, val); }catch(e){}
+  applyTierFilterUI();
   if(panels.game.classList.contains('active')){
     startRecipe(pickRecipe(state.recipeIndex));
   }
@@ -1266,9 +1268,9 @@ document.getElementById('nextBtn').addEventListener('click', function(){
 });
 
 Array.prototype.slice.call(document.querySelectorAll('.modeFilterBtn')).forEach(function(btn){
-  btn.addEventListener('click', function(){ setTempFilter(btn.getAttribute('data-tempfilter')); });
+  btn.addEventListener('click', function(){ setTierFilter(btn.getAttribute('data-tierfilter')); });
 });
-applyTempFilterUI();
+applyTierFilterUI();
 
 /* ===================== RECIPE BOOK ===================== */
 var bookList = document.getElementById('bookList');
