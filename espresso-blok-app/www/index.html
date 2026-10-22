@@ -11,17 +11,17 @@
 <style>
 :root{
   --bg:#F6EEE1; --bg-deep:#ECE0C8; --surface:#FFFFFF; --ink:#2A1B12; --muted:#8B7360;
-  --accent:#C0632B; --crema:#C9972E; --line:#E6D7C1; --bad:#B23A2E;
+  --accent:#C0632B; --crema:#C9972E; --line:#E6D7C1; --bad:#B23A2E; --cup-glass:rgba(42,27,18,.08);
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#1C140F; --bg-deep:#17100B; --surface:#2A1E16; --ink:#F1E6D8; --muted:#B59C86;
-    --accent:#E08A52; --crema:#E0B64E; --line:#4A3626; --bad:#E07363; color-scheme:dark;
+    --accent:#E08A52; --crema:#E0B64E; --line:#4A3626; --bad:#E07363; --cup-glass:rgba(255,255,255,.1); color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#1C140F; --bg-deep:#17100B; --surface:#2A1E16; --ink:#F1E6D8; --muted:#B59C86;
-  --accent:#E08A52; --crema:#E0B64E; --line:#4A3626; --bad:#E07363; color-scheme:dark;
+  --accent:#E08A52; --crema:#E0B64E; --line:#4A3626; --bad:#E07363; --cup-glass:rgba(255,255,255,.1); color-scheme:dark;
 }
 *{box-sizing:border-box}
 body{
@@ -146,7 +146,7 @@ body{
 
 .cup{position:relative;flex:0 0 auto;height:150px;transition:height .25s ease-out,width .25s ease-out}
 .cupGlass{position:absolute;inset:0;border:2px solid var(--ink);border-top:none;
-  overflow:hidden;background:rgba(255,255,255,.1);transition:clip-path .25s ease-out}
+  overflow:hidden;background:var(--cup-glass);transition:clip-path .25s ease-out}
 .cupFill{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column-reverse;
   transition:height .35s ease-out;height:0}
 .cupLayer{width:100%}
