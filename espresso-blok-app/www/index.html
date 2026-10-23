@@ -244,6 +244,15 @@ body{
 .modeFilterBtn{font-family:'Public Sans',sans-serif;font-weight:600;font-size:11.5px;border:1px solid var(--line);
   background:var(--surface);color:var(--muted);border-radius:20px;padding:7px 14px;cursor:pointer}
 .modeFilterBtn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.cafeIntro{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px}
+.cafeStations{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.cafeStationBtn{flex:1 1 130px;display:flex;flex-direction:column;align-items:center;gap:6px;
+  font-family:'Public Sans',sans-serif;font-weight:600;font-size:11.5px;color:var(--muted);
+  border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:14px 8px;cursor:pointer}
+.cafeStationBtn .cafeStationIcon{font-size:26px;line-height:1}
+.cafeStationBtn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.cafeStationGroup{display:none}
+.cafeStationGroup.active{display:block}
 .bookTierHead{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:15px;color:var(--ink);
   margin-top:10px;padding-bottom:4px;border-bottom:2px solid var(--accent);display:inline-block}
 .bookTierHead:first-child{margin-top:0}
@@ -355,6 +364,7 @@ body{
 
   <div class="tabbar">
     <button class="tabbtn active" type="button" data-tab="game">Oyun</button>
+    <button class="tabbtn" type="button" data-tab="cafe">Cafe</button>
     <button class="tabbtn" type="button" data-tab="book">Tarif Kitabı</button>
     <button class="tabbtn" type="button" data-tab="guess">Bu Ne?</button>
     <button class="tabbtn" type="button" data-tab="badges">Rozetler</button>
@@ -628,6 +638,91 @@ body{
     </div>
   </div>
 
+  <!-- ===================== CAFE PANEL ===================== -->
+  <div class="panel" id="panelCafe">
+    <div class="cafeIntro">Gerçek bir kahve barındaki gibi — önce istasyonu seç, sonra parçayı tarife ekle. Kaydırmadan, tek ekranda.</div>
+
+    <div class="modeFilters">
+      <button class="modeFilterBtn active" type="button" data-tierfilter="all">Tümü</button>
+      <button class="modeFilterBtn" type="button" data-tierfilter="1">Kahveci</button>
+      <button class="modeFilterBtn" type="button" data-tierfilter="2">Barista</button>
+      <button class="modeFilterBtn" type="button" data-tierfilter="3">Gurme</button>
+    </div>
+
+    <div class="ticket" id="ticketCafe">
+      <div class="ticket-head"><span>SİPARİŞ</span></div>
+      <div class="ticket-name" id="targetNameCafe">—</div>
+      <div class="ticket-progress" id="targetProgressCafe"></div>
+      <div class="ticket-actions">
+        <button class="btn ghost" id="resetBtnCafe" type="button">Sıfırla</button>
+        <button class="btn ghost" id="giveupBtnCafe" type="button">Sonuç</button>
+        <div class="spacer"></div>
+        <button class="btn" id="skipBtnCafe" type="button">Yeni Tarif</button>
+      </div>
+    </div>
+
+    <div class="miniTicket" id="miniTicketCafe">
+      <span class="miniTicket-label">Hazırlanan</span>
+      <span class="miniTicket-name" id="miniTicketNameCafe">—</span>
+    </div>
+
+    <div class="tower-box" id="towerBoxCafe" style="margin-top:14px">
+      <div class="success" id="successBoxCafe">
+        <div class="steamWrap"><div class="steam"></div><div class="steam"></div><div class="steam"></div></div>
+        <div class="check">✓</div>
+        <div class="label" id="successLabelCafe"></div>
+        <div class="levelUpMsg" id="levelUpMsgCafe" hidden></div>
+        <div class="speedMsg" id="speedMsgCafe"></div>
+        <div class="compList" id="compListCafe"></div>
+        <div class="totals" id="totalsLineCafe"></div>
+        <button class="btn" id="nextBtnCafe">Sıradaki Tarif</button>
+      </div>
+      <div class="stackRow">
+        <div>
+          <div class="cup" id="cupElCafe">
+            <div class="cupGlass"></div>
+            <div class="cupFill" id="cupFillCafe"></div>
+            <div class="cupRim"></div>
+            <div class="cupHandle"></div>
+          </div>
+          <div class="cupLabel">bardak</div>
+        </div>
+        <div class="tower" id="towerCafe"></div>
+      </div>
+      <div class="empty-hint" id="emptyHintCafe">Bir istasyona dokun, sonra parçayı seç.</div>
+    </div>
+
+    <div class="cafeStations" id="cafeStations">
+      <button class="cafeStationBtn active" type="button" data-station="espresso">
+        <span class="cafeStationIcon">☕</span>Espresso Makinesi
+      </button>
+      <button class="cafeStationBtn" type="button" data-station="milk">
+        <span class="cafeStationIcon">🥛</span>Süt Köpürtme
+      </button>
+      <button class="cafeStationBtn" type="button" data-station="garnish">
+        <span class="cafeStationIcon">🍫</span>Şurup &amp; Çikolata
+      </button>
+      <button class="cafeStationBtn" type="button" data-station="ice">
+        <span class="cafeStationIcon">🍨</span>Dondurma &amp; Buz
+      </button>
+    </div>
+
+    <div class="cafeStationGroup active" data-stationgroup="espresso">
+      <div class="chips" id="paletteEspressoCafe"></div>
+    </div>
+    <div class="cafeStationGroup" data-stationgroup="milk">
+      <div class="chips" id="paletteMilkCafe"></div>
+    </div>
+    <div class="cafeStationGroup" data-stationgroup="garnish">
+      <div class="chips" id="paletteGarnishCafe"></div>
+    </div>
+    <div class="cafeStationGroup" data-stationgroup="ice">
+      <div class="chips" id="paletteIceCafe"></div>
+    </div>
+
+    <div class="factPanel" id="factPanelCafe"></div>
+  </div>
+
 </div>
 
 <div class="sr-only" id="liveRegion" aria-live="polite"></div>
@@ -764,7 +859,7 @@ function setTierFilter(val){
   tierFilter = val;
   try{ localStorage.setItem(TIER_FILTER_KEY, val); }catch(e){}
   applyTierFilterUI();
-  if(panels.game.classList.contains('active')){
+  if(panels.game.classList.contains('active') || panels.cafe.classList.contains('active')){
     startRecipe(pickRecipe(state.recipeIndex));
   }
   if(panels.race.classList.contains('active') && raceState.active){
@@ -989,7 +1084,8 @@ var panels = {
   guess: document.getElementById('panelGuess'),
   badges: document.getElementById('panelBadges'),
   race: document.getElementById('panelRace'),
-  custom: document.getElementById('panelCustom')
+  custom: document.getElementById('panelCustom'),
+  cafe: document.getElementById('panelCafe')
 };
 var tabButtons = Array.prototype.slice.call(document.querySelectorAll('.tabbtn'));
 tabButtons.forEach(function(btn){
@@ -1053,6 +1149,97 @@ Object.keys(INGREDIENTS).forEach(function(id){
   var ing = INGREDIENTS[id];
   buildChip(id, 'ing-', GROUP_EL[ing.group] || GROUP_EL.espresso, towerBox, function(pid){ evaluateAttempt(pid); });
 });
+
+/* ---------- Cafe modu: ayni oyun durumu, istasyonlu malzeme secimi ---------- */
+var towerCafe = document.getElementById('towerCafe');
+var towerBoxCafe = document.getElementById('towerBoxCafe');
+var targetNameCafe = document.getElementById('targetNameCafe');
+var miniTicketNameCafe = document.getElementById('miniTicketNameCafe');
+var targetProgressCafe = document.getElementById('targetProgressCafe');
+var successBoxCafe = document.getElementById('successBoxCafe');
+var successLabelCafe = document.getElementById('successLabelCafe');
+var emptyHintCafe = document.getElementById('emptyHintCafe');
+var cupElCafe = document.getElementById('cupElCafe');
+var cupFillCafe = document.getElementById('cupFillCafe');
+
+var GROUP_EL_CAFE = {
+  espresso: document.getElementById('paletteEspressoCafe'),
+  milk: document.getElementById('paletteMilkCafe'),
+  garnish: document.getElementById('paletteGarnishCafe'),
+  ice: document.getElementById('paletteIceCafe')
+};
+Object.keys(INGREDIENTS).forEach(function(id){
+  var ing = INGREDIENTS[id];
+  buildChip(id, 'ing-cafe-', GROUP_EL_CAFE[ing.group] || GROUP_EL_CAFE.espresso, towerBoxCafe, function(pid){ evaluateAttempt(pid); });
+});
+
+Array.prototype.slice.call(document.querySelectorAll('.cafeStationBtn')).forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var station = btn.getAttribute('data-station');
+    Array.prototype.slice.call(document.querySelectorAll('.cafeStationBtn')).forEach(function(b){
+      b.classList.toggle('active', b === btn);
+    });
+    Array.prototype.slice.call(document.querySelectorAll('.cafeStationGroup')).forEach(function(g){
+      g.classList.toggle('active', g.getAttribute('data-stationgroup') === station);
+    });
+  });
+});
+
+var VIEW_REFS_GAME = {
+  targetName: targetName, miniTicketName: miniTicketName, targetProgress: targetProgress,
+  towerEl: towerEl, cupEl: cupEl, cupFill: cupFill, emptyHint: emptyHint,
+  successBox: successBox, successLabel: successLabel,
+  compListEl: document.getElementById('compList'), totalsLineEl: document.getElementById('totalsLine')
+};
+var VIEW_REFS_CAFE = {
+  targetName: targetNameCafe, miniTicketName: miniTicketNameCafe, targetProgress: targetProgressCafe,
+  towerEl: towerCafe, cupEl: cupElCafe, cupFill: cupFillCafe, emptyHint: emptyHintCafe,
+  successBox: successBoxCafe, successLabel: successLabelCafe,
+  compListEl: document.getElementById('compListCafe'), totalsLineEl: document.getElementById('totalsLineCafe')
+};
+
+function renderCompositionInto(compListEl, totalsLineEl, r){
+  compListEl.innerHTML = '';
+  r.parts.forEach(function(id){
+    var ing = INGREDIENTS[id];
+    var row = document.createElement('div');
+    row.className = 'ct';
+    row.innerHTML = '<b>' + ing.label + '</b><span>' + ing.meta + '</span>';
+    compListEl.appendChild(row);
+  });
+  totalsLineEl.textContent = totalsLineText(computeTotals(r.parts));
+}
+
+function syncRecipeView(refs, r){
+  refs.targetName.innerHTML = '<span>' + r.name + '</span><span class="tempBadge ' + (r.iced ? 'cold">SOĞUK' : 'hot">SICAK') + '</span>';
+  refs.miniTicketName.textContent = r.name + (r.iced ? ' (Soğuk)' : ' (Sıcak)');
+
+  refs.targetProgress.innerHTML = '';
+  for(var i = 0; i < r.parts.length; i++){
+    var dot = document.createElement('div');
+    dot.className = 'dot' + (i < state.stack.length ? ' filled' : '');
+    refs.targetProgress.appendChild(dot);
+  }
+  var cap = document.createElement('div');
+  cap.className = 'cap';
+  cap.textContent = state.stack.length + ' / ' + r.parts.length + ' parça';
+  refs.targetProgress.appendChild(cap);
+
+  renderTowerBlocks(refs.towerEl, state.stack, justAdded);
+
+  var totalAmt = r.parts.reduce(function(s,id){ return s + (INGREDIENTS[id].amount || 0); }, 0);
+  updateCup(refs.cupEl, refs.cupFill, totalAmt, state.stack, refs.towerEl, r.cup);
+
+  var solved = state.stack.length === r.parts.length;
+  refs.emptyHint.style.display = (state.stack.length === 0 && !solved) ? 'block' : 'none';
+  refs.successBox.classList.toggle('show', solved);
+  refs.successBox.classList.toggle('revealed', solved && state.revealed);
+  refs.successBox.classList.toggle('iced', !!r.iced);
+  if(solved){
+    refs.successLabel.textContent = state.revealed ? (r.name + ' — çözüm gösterildi') : (r.name + ' tamamlandı');
+    renderCompositionInto(refs.compListEl, refs.totalsLineEl, r);
+  }
+}
 
 var state = { recipeIndex: -1, stack: [], score: 0, total: 0, revealed: false, combo: 0, bestCombo: 0 };
 var justAdded = false;
@@ -1123,53 +1310,15 @@ function currentRecipe(){ return RECIPES[state.recipeIndex]; }
 
 function render(){
   var r = currentRecipe();
-  targetName.innerHTML = '<span>' + r.name + '</span><span class="tempBadge ' + (r.iced ? 'cold">SOĞUK' : 'hot">SICAK') + '</span>';
-  miniTicketName.textContent = r.name + (r.iced ? ' (Soğuk)' : ' (Sıcak)');
   recipeCounter.textContent = 'SİPARİŞ #' + String(state.total + 1).padStart(2,'0');
   scoreVal.textContent = state.score;
   totalVal.textContent = state.total;
   renderLevelBar();
   renderComboBadge();
 
-  targetProgress.innerHTML = '';
-  for(var i = 0; i < r.parts.length; i++){
-    var dot = document.createElement('div');
-    dot.className = 'dot' + (i < state.stack.length ? ' filled' : '');
-    targetProgress.appendChild(dot);
-  }
-  var cap = document.createElement('div');
-  cap.className = 'cap';
-  cap.textContent = state.stack.length + ' / ' + r.parts.length + ' parça';
-  targetProgress.appendChild(cap);
-
-  renderTowerBlocks(towerEl, state.stack, justAdded);
+  syncRecipeView(VIEW_REFS_GAME, r);
+  syncRecipeView(VIEW_REFS_CAFE, r);
   justAdded = false;
-
-  var totalAmt = r.parts.reduce(function(s,id){ return s + (INGREDIENTS[id].amount || 0); }, 0);
-  updateCup(cupEl, cupFill, totalAmt, state.stack, towerEl, r.cup);
-
-  var solved = state.stack.length === r.parts.length;
-  emptyHint.style.display = (state.stack.length === 0 && !solved) ? 'block' : 'none';
-  successBox.classList.toggle('show', solved);
-  successBox.classList.toggle('revealed', solved && state.revealed);
-  successBox.classList.toggle('iced', !!r.iced);
-  if(solved){
-    successLabel.textContent = state.revealed ? (r.name + ' — çözüm gösterildi') : (r.name + ' tamamlandı');
-    renderComposition(r);
-  }
-}
-
-function renderComposition(r){
-  var compList = document.getElementById('compList');
-  compList.innerHTML = '';
-  r.parts.forEach(function(id){
-    var ing = INGREDIENTS[id];
-    var row = document.createElement('div');
-    row.className = 'ct';
-    row.innerHTML = '<b>' + ing.label + '</b><span>' + ing.meta + '</span>';
-    compList.appendChild(row);
-  });
-  document.getElementById('totalsLine').textContent = totalsLineText(computeTotals(r.parts));
 }
 
 var COMBO_MILESTONES = [3, 5, 10, 15, 20, 30, 50];
@@ -1209,19 +1358,26 @@ function evaluateAttempt(id){
     render();
     showFact(id);
 
-    var msgEl = document.getElementById('levelUpMsg');
-    var speedEl = document.getElementById('speedMsg');
+    var msgElList = [document.getElementById('levelUpMsg'), document.getElementById('levelUpMsgCafe')];
+    var speedElList = [document.getElementById('speedMsg'), document.getElementById('speedMsgCafe')];
     if(wasLast){
+      msgElList.forEach(function(msgEl){
+        if(tierAfter > tierBefore){
+          msgEl.textContent = '🎉 Tebrikler, ' + tierById(tierAfter).name + ' seviyesine yükseldin!';
+          msgEl.hidden = false;
+        }else{
+          msgEl.hidden = true;
+        }
+      });
       if(tierAfter > tierBefore){
-        msgEl.textContent = '🎉 Tebrikler, ' + tierById(tierAfter).name + ' seviyesine yükseldin!';
-        msgEl.hidden = false;
         liveRegion.textContent = tierById(tierAfter).name + ' seviyesine yükseldin.';
       }else{
-        msgEl.hidden = true;
         liveRegion.textContent = r.name + ' doğru tamamlandı.';
       }
-      speedEl.textContent = '⏱ ' + elapsedSec.toFixed(1) + 's' + (isRecord ? ' · Yeni rekor!' : ' · En hızlı: ' + bestTimes[r.name].toFixed(1) + 's');
-      speedEl.classList.toggle('record', isRecord);
+      speedElList.forEach(function(speedEl){
+        speedEl.textContent = '⏱ ' + elapsedSec.toFixed(1) + 's' + (isRecord ? ' · Yeni rekor!' : ' · En hızlı: ' + bestTimes[r.name].toFixed(1) + 's');
+        speedEl.classList.toggle('record', isRecord);
+      });
       checkNewBadges();
     }else{
       liveRegion.textContent = INGREDIENTS[id].label + ' doğru — sırada bir sonraki parça var.';
@@ -1235,6 +1391,7 @@ function evaluateAttempt(id){
     hadMistakeThisAttempt = true;
     renderComboBadge();
     towerBox.classList.remove('shake'); void towerBox.offsetWidth; towerBox.classList.add('shake');
+    towerBoxCafe.classList.remove('shake'); void towerBoxCafe.offsetWidth; towerBoxCafe.classList.add('shake');
     liveRegion.textContent = 'Yanlış parça, sırayı kontrol et.';
   }
   saveSnapshot();
@@ -1242,22 +1399,29 @@ function evaluateAttempt(id){
 
 function showFact(id){
   var ing = INGREDIENTS[id];
-  var panel = document.getElementById('factPanel');
-  panel.innerHTML = '<b>' + ing.label + ' · ' + ing.meta + '</b>' + ing.fact;
-  panel.classList.remove('show'); void panel.offsetWidth; panel.classList.add('show');
+  [document.getElementById('factPanel'), document.getElementById('factPanelCafe')].forEach(function(panel){
+    panel.innerHTML = '<b>' + ing.label + ' · ' + ing.meta + '</b>' + ing.fact;
+    panel.classList.remove('show'); void panel.offsetWidth; panel.classList.add('show');
+  });
 }
 
-document.getElementById('resetBtn').addEventListener('click', function(){
+function clearFactAndSpeedPanels(){
+  document.getElementById('factPanel').classList.remove('show');
+  document.getElementById('factPanelCafe').classList.remove('show');
+  document.getElementById('speedMsg').textContent = '';
+  document.getElementById('speedMsgCafe').textContent = '';
+}
+
+function doResetRecipe(){
   state.stack = [];
   state.revealed = false;
   hadMistakeThisAttempt = false;
   recipeStartTime = Date.now();
-  document.getElementById('factPanel').classList.remove('show');
-  document.getElementById('speedMsg').textContent = '';
+  clearFactAndSpeedPanels();
   render(); saveSnapshot();
-});
+}
 
-document.getElementById('giveupBtn').addEventListener('click', function(){
+function doGiveupRecipe(){
   var r = currentRecipe();
   if(state.stack.length === r.parts.length) return;
   state.stack = r.parts.slice();
@@ -1265,23 +1429,32 @@ document.getElementById('giveupBtn').addEventListener('click', function(){
   state.total++;
   state.combo = 0;
   renderComboBadge();
-  document.getElementById('factPanel').classList.remove('show');
-  document.getElementById('speedMsg').textContent = '';
+  clearFactAndSpeedPanels();
   render(); saveSnapshot();
-});
+}
 
-document.getElementById('skipBtn').addEventListener('click', function(){
+function doSkipRecipe(){
   if(!(state.stack.length === currentRecipe().parts.length)){
     state.total++;
   }
   startRecipe(pickRecipe(state.recipeIndex));
   saveSnapshot();
-});
+}
 
-document.getElementById('nextBtn').addEventListener('click', function(){
+function doNextRecipe(){
   startRecipe(pickRecipe(state.recipeIndex));
   saveSnapshot();
-});
+}
+
+document.getElementById('resetBtn').addEventListener('click', doResetRecipe);
+document.getElementById('giveupBtn').addEventListener('click', doGiveupRecipe);
+document.getElementById('skipBtn').addEventListener('click', doSkipRecipe);
+document.getElementById('nextBtn').addEventListener('click', doNextRecipe);
+
+document.getElementById('resetBtnCafe').addEventListener('click', doResetRecipe);
+document.getElementById('giveupBtnCafe').addEventListener('click', doGiveupRecipe);
+document.getElementById('skipBtnCafe').addEventListener('click', doSkipRecipe);
+document.getElementById('nextBtnCafe').addEventListener('click', doNextRecipe);
 
 Array.prototype.slice.call(document.querySelectorAll('.modeFilterBtn')).forEach(function(btn){
   btn.addEventListener('click', function(){ setTierFilter(btn.getAttribute('data-tierfilter')); });
