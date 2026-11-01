@@ -1022,11 +1022,36 @@ function isOverZone(zoneEl, e){
   var rect = zoneEl.getBoundingClientRect();
   return e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom;
 }
+/* Surukleme sadece pointerup ile degil; pointercancel, ikinci parmak, uygulamanin
+   arka plana gecmesi gibi durumlarda da temizlenmeli. Aksi halde kopya parca ekranda
+   asili kalir ve "dragging" dolu kaldigi icin oyun yeni parca kabul etmez. */
+function cancelDrag(){
+  var d = dragging;
+  dragging = null;
+  document.removeEventListener('pointermove', onDragMove);
+  document.removeEventListener('pointerup', onDragEnd);
+  document.removeEventListener('pointercancel', cancelDrag);
+  if(d){
+    if(d.clone) d.clone.remove();
+    if(d.chipEl) d.chipEl.style.opacity = '';
+    if(d.dropZoneEl) d.dropZoneEl.classList.remove('dragover');
+  }
+  Array.prototype.slice.call(document.querySelectorAll('.dragClone')).forEach(function(el){ el.remove(); });
+}
+window.addEventListener('blur', cancelDrag);
+document.addEventListener('visibilitychange', function(){ if(document.hidden) cancelDrag(); });
+
 function startDrag(e, id, chipEl, dropZoneEl, onDrop){
   if(chipEl.style.pointerEvents === 'none') return;
   e.preventDefault();
+  if(dragging){
+    if(dragging.pointerId !== e.pointerId) return; // ikinci parmak: yok say
+    cancelDrag(); // ayni parmaktan kalmis eski bir surukleme: temizle
+  }
   var rect = chipEl.getBoundingClientRect();
   var clone = chipEl.cloneNode(true);
+  clone.removeAttribute('id');
+  clone.classList.add('dragClone');
   clone.style.position = 'fixed';
   clone.style.left = rect.left + 'px';
   clone.style.top = rect.top + 'px';
@@ -1038,27 +1063,23 @@ function startDrag(e, id, chipEl, dropZoneEl, onDrop){
   clone.style.transform = 'scale(1.05) rotate(-1.5deg)';
   clone.style.boxShadow = '0 14px 28px rgba(0,0,0,.3)';
   document.body.appendChild(clone);
-  dragging = { id:id, clone:clone, offX: e.clientX - rect.left, offY: e.clientY - rect.top, chipEl:chipEl, dropZoneEl:dropZoneEl, onDrop:onDrop };
+  dragging = { id:id, pointerId:e.pointerId, clone:clone, offX: e.clientX - rect.left, offY: e.clientY - rect.top, chipEl:chipEl, dropZoneEl:dropZoneEl, onDrop:onDrop };
   chipEl.style.opacity = '0.35';
   document.addEventListener('pointermove', onDragMove);
   document.addEventListener('pointerup', onDragEnd);
+  document.addEventListener('pointercancel', cancelDrag);
 }
 function onDragMove(e){
-  if(!dragging) return;
+  if(!dragging || e.pointerId !== dragging.pointerId) return;
   dragging.clone.style.left = (e.clientX - dragging.offX) + 'px';
   dragging.clone.style.top = (e.clientY - dragging.offY) + 'px';
   dragging.dropZoneEl.classList.toggle('dragover', isOverZone(dragging.dropZoneEl, e));
 }
 function onDragEnd(e){
-  if(!dragging) return;
+  if(!dragging || e.pointerId !== dragging.pointerId) return;
   var d = dragging;
   var dropped = isOverZone(d.dropZoneEl, e);
-  d.clone.remove();
-  d.chipEl.style.opacity = '';
-  d.dropZoneEl.classList.remove('dragover');
-  document.removeEventListener('pointermove', onDragMove);
-  document.removeEventListener('pointerup', onDragEnd);
-  dragging = null;
+  cancelDrag();
   if(dropped) d.onDrop(d.id);
 }
 function buildChip(id, idPrefix, containerEl, dropZoneEl, onDrop){
