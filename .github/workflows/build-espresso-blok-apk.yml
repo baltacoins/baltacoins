@@ -7,6 +7,7 @@ on:
       - '.github/workflows/build-espresso-blok-apk.yml'
   workflow_dispatch: {}
 
+# Release oluşturmak için yazma izni gerekiyor. Derlenen dosyalar artık repoya commit edilmiyor.
 permissions:
   contents: write
 
@@ -24,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -34,6 +35,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24'
+          cache: npm
+          cache-dependency-path: espresso-blok-app/package-lock.json
 
       - name: Show versions
         run: |
@@ -41,17 +44,22 @@ jobs:
           npm -v
           java -version
 
+      # package-lock.json sayesinde her derleme aynı paket sürümleriyle yapılır.
       - name: Install npm dependencies
         run: |
           set +e
-          OUT=$(npm install 2>&1)
+          OUT=$(npm ci 2>&1)
           CODE=$?
           echo "$OUT"
           if [ $CODE -ne 0 ]; then
             ESC=$(echo "$OUT" | tail -c 3500 | sed ':a;N;$!ba;s/\n/%0A/g')
-            echo "::error::npm install failed: $ESC"
+            echo "::error::npm ci failed: $ESC"
           fi
           exit $CODE
+
+      # Aynı bloklardan oluşan iki tarif, tanımsız parça ya da hatalı bardak bilgisi varsa derleme durur.
+      - name: Tarif verisini denetle
+        run: node scripts/check-recipes.mjs
 
       - name: Sync Capacitor Android project
         run: |
@@ -120,46 +128,25 @@ jobs:
             espresso-blok-app/android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
 
-      - name: Commit builds back to repo (so they can be fetched outside Actions storage)
+      # Eskiden derlenen dosyalar dist/ klasörüne commit ediliyordu; bu repoyu şişiriyor ve
+      # başka dallardan gelen derlemeler main'deki dosyaların üzerine yazıyordu.
+      # Artık yalnızca main dalındaki derleme "son-derleme" adlı GitHub Release'e yüklenir.
+      # Sabit indirme adresi: https://github.com/<kullanıcı>/<repo>/releases/tag/son-derleme
+      - name: Son derlemeyi GitHub Releases'e yükle (yalnızca main)
+        if: ${{ github.ref == 'refs/heads/main' && env.ESPRESSO_KEYSTORE_BASE64 != '' }}
         working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
-          set +e
-          mkdir -p /tmp/dist-out
-          cp espresso-blok-app/android/app/build/outputs/apk/debug/app-debug.apk /tmp/dist-out/espresso-blok-debug.apk
-          if [ -n "$ESPRESSO_KEYSTORE_BASE64" ]; then
-            cp espresso-blok-app/android/app/build/outputs/bundle/release/app-release.aab /tmp/dist-out/espresso-blok-release.aab
-            cp espresso-blok-app/android/app/build/outputs/apk/release/app-release.apk /tmp/dist-out/espresso-blok-release.apk
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          SUCCESS=0
-          for i in 1 2 3 4 5; do
-            git fetch origin main && git reset --hard origin/main
-            mkdir -p dist
-            cp /tmp/dist-out/*.apk /tmp/dist-out/*.aab dist/ 2>/dev/null
-            cp /tmp/dist-out/espresso-blok-debug.apk dist/espresso-blok-debug.apk
-            if [ -n "$ESPRESSO_KEYSTORE_BASE64" ]; then
-              cp /tmp/dist-out/espresso-blok-release.aab dist/espresso-blok-release.aab
-              cp /tmp/dist-out/espresso-blok-release.apk dist/espresso-blok-release.apk
-            fi
-            git add dist/
-            if git diff --cached --quiet; then
-              echo "Derlenen dosyalar degismedi, commit atlaniyor."
-              SUCCESS=1
-              break
-            fi
-            git commit -m "dist: derlenen APK/AAB dosyalari guncellendi [skip ci]"
-            if git push origin main; then
-              SUCCESS=1
-              break
-            fi
-            echo "push basarisiz (muhtemelen ayni anda baska bir calisma push etti), $((i*3))s bekleyip tekrar deneniyor..."
-            sleep $((i*3))
-          done
-
-          if [ "$SUCCESS" != "1" ]; then
-            echo "::error::dist/ push 5 denemeden sonra basarisiz oldu."
-            exit 1
-          fi
-          exit 0
+          set -e
+          mkdir -p /tmp/rel
+          cp espresso-blok-app/android/app/build/outputs/apk/debug/app-debug.apk /tmp/rel/espresso-blok-debug.apk
+          cp espresso-blok-app/android/app/build/outputs/bundle/release/app-release.aab /tmp/rel/espresso-blok-release.aab
+          cp espresso-blok-app/android/app/build/outputs/apk/release/app-release.apk /tmp/rel/espresso-blok-release.apk
+          gh release delete son-derleme --yes --cleanup-tag || true
+          gh release create son-derleme /tmp/rel/* \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --title "Son derleme (versionCode ${{ github.run_number }})" \
+            --notes "main dalının en son otomatik derlemesi. Commit: $GITHUB_SHA. Play Console'a yüklenecek dosya: espresso-blok-release.aab"

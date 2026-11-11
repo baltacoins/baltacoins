@@ -340,7 +340,7 @@ body{
 </head>
 <body>
 
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..800&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="fonts/fonts.css">
 
 <div class="shell">
 
@@ -811,7 +811,7 @@ var RECIPES = [
   { name:"Lungo Macchiato",    parts:["lungo","kasik_kopuk"], tier:2, cup:{type:"ceramicCup", min:200, max:260} },
   { name:"Ristretto Macchiato",parts:["ristretto","kasik_kopuk"], tier:2, cup:{type:"ceramicCup", min:70, max:90} },
   { name:"Doppio Macchiato",   parts:["espresso","espresso","kasik_kopuk"], tier:2, cup:{type:"ceramicCup", min:70, max:90} },
-  { name:"Long Macchiato",     parts:["espresso","espresso","kasik_kopuk"], tier:2, cup:{type:"ceramicCup", min:70, max:90} },
+  { name:"Long Macchiato",     parts:["sicak_su","espresso","kasik_kopuk"], tier:2, cup:{type:"ceramicMug", min:300, max:400} },
   { name:"Espresso Con Panna", parts:["espresso","kasik_krem_santi"], tier:3, cup:{type:"ceramicCup", min:70, max:90} },
   { name:"Vienna Coffee",      parts:["espresso","espresso","kasik_krem_santi"], tier:2, cup:{type:"ceramicCup", min:70, max:90} },
   { name:"Bombón",             parts:["kondanse_sut","espresso","kasik_kopuk"], tier:3, cup:{type:"glass", min:90, max:110} },
@@ -1643,7 +1643,14 @@ function renderSaved(){
     var item = document.createElement('div');
     item.className = 'savedItem';
     var left = document.createElement('div');
-    left.innerHTML = '<div class="nm">' + rec.name + '</div><div class="meta">' + rec.parts.length + ' parça · ' + totalsLineText(totals) + '</div>';
+    var nmEl = document.createElement('div');
+    nmEl.className = 'nm';
+    nmEl.textContent = rec.name;
+    var metaEl = document.createElement('div');
+    metaEl.className = 'meta';
+    metaEl.textContent = rec.parts.length + ' parça · ' + totalsLineText(totals);
+    left.appendChild(nmEl);
+    left.appendChild(metaEl);
     var del = document.createElement('button');
     del.className = 'btn ghost small';
     del.type = 'button';
