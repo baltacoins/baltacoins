@@ -363,6 +363,51 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+/* ---------- 1.2: ayarlar, tema, tanitim ---------- */
+.topRight{display:flex;align-items:center;gap:10px}
+.iconBtn{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);
+  display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto;padding:0}
+.iconBtn svg{width:22px;height:22px}
+.sheetBack{position:fixed;inset:0;background:rgba(20,12,8,.5);z-index:60;display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .2s}
+.sheetBack.open{opacity:1;pointer-events:auto}
+.sheet{width:100%;max-width:560px;background:var(--bg);color:var(--ink);border-radius:20px 20px 0 0;
+  padding:22px 20px calc(22px + env(safe-area-inset-bottom,0px));max-height:88vh;overflow:auto;
+  transform:translateY(24px);transition:transform .2s;box-shadow:0 -10px 40px rgba(0,0,0,.25)}
+.sheetBack.open .sheet{transform:none}
+.sheetHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sheetTitle{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:20px}
+.setGroup{background:var(--surface);border:1px solid var(--line);border-radius:14px;margin-bottom:14px;overflow:hidden}
+.setLabel{font-size:11.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:0 4px 6px}
+.setRow{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:12px 16px;background:none;border:none;
+  border-bottom:1px solid var(--line);color:var(--ink);font:inherit;font-size:14.5px;text-align:left;cursor:pointer;text-decoration:none}
+.setRow:last-child{border-bottom:none}
+.setRow .ic{width:24px;text-align:center;font-size:18px;flex:0 0 auto}
+.setRow .tx{flex:1}
+.setRow .sub{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.setRow .chev{color:var(--muted)}
+.segRow{display:flex;gap:6px;padding:10px}
+.segBtn{flex:1;min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);
+  font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
+.segBtn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.verLine{text-align:center;font-size:12px;color:var(--muted);margin-top:4px}
+.obBack{position:fixed;inset:0;z-index:70;display:none;align-items:flex-end;justify-content:center;background:rgba(20,12,8,.55);
+  padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+.obBack.open{display:flex}
+.obCard{width:100%;max-width:440px;background:var(--surface);color:var(--ink);border-radius:20px;padding:22px 22px 18px;
+  box-shadow:0 14px 40px rgba(0,0,0,.3)}
+.obIcon{font-size:34px;line-height:1}
+.obTitle{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:21px;margin:10px 0 6px}
+.obText{font-size:14.5px;line-height:1.55;color:var(--ink)}
+.obFoot{display:flex;align-items:center;gap:10px;margin-top:18px}
+.obDots{display:flex;gap:6px;flex:1}
+.obDot{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.obDot.on{background:var(--accent);width:20px;border-radius:4px}
+.obStep{font-size:12px;color:var(--muted);margin-top:8px}
+.badgeToast{z-index:80}
+[hidden]{display:none!important}
+.obSpot{position:relative;z-index:71;box-shadow:0 0 0 4px var(--accent),0 0 0 9999px rgba(20,12,8,.0)!important;border-radius:10px}
 </style>
 </head>
 <body>
@@ -376,10 +421,15 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
       <div class="mark"><span></span><span></span></div>
       <div class="brand-name">Espresso Blok</div>
     </div>
+    <div class="topRight">
     <div class="scoreboard">
       <span class="num" id="scoreVal">0</span><span class="sep">/</span><span class="den" id="totalVal">0</span>
       <span class="lbl">doğru tarif</span>
       <span class="comboBadge" id="comboBadge" hidden>🔥 <span id="comboVal">0</span></span>
+    </div>
+    <button class="iconBtn" id="settingsBtn" type="button" aria-label="Ayarlar" aria-haspopup="dialog">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
     </div>
   </div>
 
@@ -754,6 +804,49 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 
 <div class="sr-only" id="liveRegion" aria-live="polite"></div>
 <div class="badgeToast" id="badgeToast"></div>
+
+<div class="sheetBack" id="settingsSheet" aria-hidden="true">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="sheetHead">
+      <div class="sheetTitle" id="settingsTitle">Ayarlar</div>
+      <button class="iconBtn" id="settingsClose" type="button" aria-label="Kapat">✕</button>
+    </div>
+    <div class="setLabel">Görünüm</div>
+    <div class="setGroup">
+      <div class="segRow" role="group" aria-label="Tema">
+        <button class="segBtn" type="button" data-theme-opt="auto">Otomatik</button>
+        <button class="segBtn" type="button" data-theme-opt="light">Açık</button>
+        <button class="segBtn" type="button" data-theme-opt="dark">Koyu</button>
+      </div>
+    </div>
+    <div class="setLabel">Yardım</div>
+    <div class="setGroup">
+      <button class="setRow" type="button" id="setTutorial"><span class="ic">🎓</span><span class="tx">Nasıl Oynanır?<span class="sub">Kısa tanıtımı yeniden göster</span></span><span class="chev">›</span></button>
+      <a class="setRow" id="setFeedback" href="#"><span class="ic">✉️</span><span class="tx">Geri Bildirim Gönder<span class="sub">Öneri ya da hata bildir: destek@espressoblok.com</span></span><span class="chev">›</span></a>
+    </div>
+    <div class="setLabel">Espresso Blok</div>
+    <div class="setGroup">
+      <button class="setRow" type="button" id="setShare"><span class="ic">📤</span><span class="tx">Uygulamayı Paylaş<span class="sub">Kahve seven arkadaşlarına gönder</span></span><span class="chev">›</span></button>
+      <a class="setRow" id="setRate" href="https://play.google.com/store/apps/details?id=com.espressoblok.app"><span class="ic">⭐</span><span class="tx">Uygulamayı Değerlendir</span><span class="chev">›</span></a>
+      <a class="setRow" href="https://espressoblok.com/gizlilik/"><span class="ic">🔒</span><span class="tx">Gizlilik Politikası</span><span class="chev">›</span></a>
+    </div>
+    <div class="verLine">Espresso Blok · sürüm <span id="appVersion">1.2</span></div>
+  </div>
+</div>
+
+<div class="obBack" id="onboarding" aria-hidden="true">
+  <div class="obCard" role="dialog" aria-modal="true" aria-labelledby="obTitle">
+    <div class="obIcon" id="obIcon">☕</div>
+    <div class="obTitle" id="obTitle"></div>
+    <div class="obText" id="obText"></div>
+    <div class="obStep" id="obStep"></div>
+    <div class="obFoot">
+      <div class="obDots" id="obDots"></div>
+      <button class="btn ghost" type="button" id="obSkip">Geç</button>
+      <button class="btn" type="button" id="obNext">İleri</button>
+    </div>
+  </div>
+</div>
 
 <script>
 (function(){
@@ -2107,6 +2200,131 @@ try{
   boot(null);
 }
 
+})();
+</script>
+
+<script>
+/* 1.2: ayarlar (tema, paylas, geri bildirim) ve ilk acilis tanitimi */
+(function(){
+var VERSION = '1.2';
+var STORE_URL = 'https://play.google.com/store/apps/details?id=com.espressoblok.app';
+var THEME_KEY = 'espressoBlokTheme';
+var OB_KEY = 'espressoBlokOnboarded';
+var root = document.documentElement;
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+function $(id){ return document.getElementById(id); }
+
+/* ---- toast ---- */
+var toastEl = $('badgeToast'), toastT = null;
+function toast(msg){
+  if(!toastEl) return;
+  toastEl.textContent = msg; toastEl.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(function(){ toastEl.classList.remove('show'); }, 2200);
+}
+
+/* ---- tema ---- */
+function applyTheme(t){
+  if(t === 'light' || t === 'dark') root.setAttribute('data-theme', t); else root.removeAttribute('data-theme');
+  var dark = t === 'dark' || (t !== 'light' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  var meta = document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute('content', dark ? '#1C140F' : '#C0632B');
+  Array.prototype.forEach.call(document.querySelectorAll('[data-theme-opt]'), function(b){
+    b.setAttribute('aria-pressed', String(b.getAttribute('data-theme-opt') === (t || 'auto')));
+  });
+}
+var theme = lsGet(THEME_KEY) || 'auto';
+applyTheme(theme);
+Array.prototype.forEach.call(document.querySelectorAll('[data-theme-opt]'), function(b){
+  b.addEventListener('click', function(){ theme = b.getAttribute('data-theme-opt'); lsSet(THEME_KEY, theme); applyTheme(theme); });
+});
+if(window.matchMedia){
+  var mq = window.matchMedia('(prefers-color-scheme: dark)');
+  var onMq = function(){ if(theme === 'auto') applyTheme('auto'); };
+  if(mq.addEventListener) mq.addEventListener('change', onMq); else if(mq.addListener) mq.addListener(onMq);
+}
+
+/* ---- ayarlar penceresi ---- */
+var sheet = $('settingsSheet'), lastFocus = null;
+function openSheet(){ lastFocus = document.activeElement; sheet.classList.add('open'); sheet.setAttribute('aria-hidden','false'); $('settingsClose').focus(); }
+function closeSheet(){ sheet.classList.remove('open'); sheet.setAttribute('aria-hidden','true'); if(lastFocus && lastFocus.focus) lastFocus.focus(); }
+$('settingsBtn').addEventListener('click', openSheet);
+$('settingsClose').addEventListener('click', closeSheet);
+sheet.addEventListener('click', function(e){ if(e.target === sheet) closeSheet(); });
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && sheet.classList.contains('open')) closeSheet(); });
+$('appVersion').textContent = VERSION;
+
+/* ---- paylas ---- */
+var SHARE_TEXT = 'Gerçek espresso tariflerini bloklarla öğreten bir oyun buldum: Espresso Blok ☕';
+function copyLink(){
+  var txt = SHARE_TEXT + ' ' + STORE_URL;
+  function done(){ toast('Bağlantı kopyalandı — istediğin yere yapıştırabilirsin.'); }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done, function(){ toast(STORE_URL); });
+  }else{ toast(STORE_URL); }
+}
+function shareApp(){
+  var cap = window.Capacitor;
+  try{
+    if(cap && cap.isNativePlatform && cap.isNativePlatform() && cap.isPluginAvailable && cap.isPluginAvailable('Share')){
+      var Share = (cap.Plugins && cap.Plugins.Share) || cap.registerPlugin('Share');
+      Share.share({ title:'Espresso Blok', text:SHARE_TEXT, url:STORE_URL, dialogTitle:'Espresso Blok\'u paylaş' })
+        .catch(function(err){ if(!/cancel/i.test(String(err && err.message))) copyLink(); });
+      return;
+    }
+  }catch(e){}
+  if(navigator.share){
+    navigator.share({ title:'Espresso Blok', text:SHARE_TEXT, url:STORE_URL }).catch(function(err){
+      if(!err || err.name !== 'AbortError') copyLink();
+    });
+    return;
+  }
+  copyLink();
+}
+$('setShare').addEventListener('click', shareApp);
+
+/* ---- geri bildirim ---- */
+$('setFeedback').setAttribute('href', 'mailto:destek@espressoblok.com?subject=' +
+  encodeURIComponent('Espresso Blok geri bildirim (sürüm ' + VERSION + ')') +
+  '&body=' + encodeURIComponent('Merhaba,\n\n(Önerini ya da karşılaştığın sorunu buraya yaz.)\n\n—\nSürüm: ' + VERSION));
+
+/* ---- ilk acilis tanitimi ---- */
+var STEPS = [
+  { icon:'☕', title:'Espresso Blok\'a hoş geldin', text:'Gerçek barista tariflerini bloklarla kuracaksın. Her blok bir malzeme; yüksekliği miktarını, sırası tarifi gösterir.', target:null },
+  { icon:'🧾', title:'Siparişi oku', text:'Üstteki fişte hazırlaman gereken içecek yazıyor. Takılırsan "Sonuç" doğru tarifi gösterir, "Yeni Tarif" başka bir sipariş getirir.', target:'ticket' },
+  { icon:'🧱', title:'Blokları sırayla ekle', text:'Aşağıdaki parçalara dokun ya da bardağın yanına sürükle. Tabandan başla: önce espresso, sonra süt ya da su, en son süsleme.', target:'towerBox' },
+  { icon:'🏅', title:'Seviye atla, keşfet', text:'Doğru tarifler seni Kahveci\'den Barista\'ya, oradan Gurme\'ye taşır. Tarif Kitabı, Bu Ne?, Yarış ve Kendi Tarifin sekmelerini de dene. Bu tanıtıma ⚙ Ayarlar\'dan tekrar ulaşabilirsin.', target:'settingsBtn' }
+];
+var ob = $('onboarding'), obI = 0, spotEl = null;
+function clearSpot(){ if(spotEl){ spotEl.classList.remove('obSpot'); spotEl = null; } }
+function renderOb(){
+  var st = STEPS[obI];
+  $('obIcon').textContent = st.icon; $('obTitle').textContent = st.title; $('obText').textContent = st.text;
+  $('obStep').textContent = (obI + 1) + ' / ' + STEPS.length;
+  var dots = $('obDots'); dots.innerHTML = '';
+  for(var i = 0; i < STEPS.length; i++){ var d = document.createElement('span'); d.className = 'obDot' + (i === obI ? ' on' : ''); dots.appendChild(d); }
+  $('obNext').textContent = obI === STEPS.length - 1 ? 'Başla' : 'İleri';
+  $('obSkip').hidden = obI === STEPS.length - 1;
+  clearSpot();
+  if(st.target){
+    var el = $(st.target);
+    if(el){ spotEl = el; el.classList.add('obSpot'); try{ el.scrollIntoView({ block:'center', behavior:'smooth' }); }catch(e){ el.scrollIntoView(); } }
+  }else{ window.scrollTo(0,0); }
+}
+function openOb(){
+  var gameTab = document.querySelector('.tabbtn[data-tab="game"]');
+  if(gameTab && !gameTab.classList.contains('active')) gameTab.click();
+  obI = 0; ob.classList.add('open'); ob.setAttribute('aria-hidden','false'); renderOb(); $('obNext').focus();
+}
+function closeOb(){ clearSpot(); ob.classList.remove('open'); ob.setAttribute('aria-hidden','true'); lsSet(OB_KEY,'1'); window.scrollTo(0,0); }
+$('obNext').addEventListener('click', function(){ if(obI < STEPS.length - 1){ obI++; renderOb(); } else closeOb(); });
+$('obSkip').addEventListener('click', closeOb);
+$('setTutorial').addEventListener('click', function(){ closeSheet(); setTimeout(openOb, 220); });
+if(!lsGet(OB_KEY)){
+  // Daha once oynamis kullanicilara (guncellemeyle gelenler) tanitimi zorla gosterme
+  if(lsGet('espressoBlokStats') || lsGet('espressoBlokProgress')) lsSet(OB_KEY,'1');
+  else setTimeout(openOb, 350);
+}
 })();
 </script>
 

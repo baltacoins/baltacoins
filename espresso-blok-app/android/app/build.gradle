@@ -12,7 +12,7 @@ android {
         // Yerel derlemede (ortam degiskeni yoksa) 1 kullanilir.
         def espressoVersionCodeEnv = System.getenv("ESPRESSO_VERSION_CODE")
         versionCode espressoVersionCodeEnv ? espressoVersionCodeEnv.toInteger() : 1
-        versionName "1.1"
+        versionName "1.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
