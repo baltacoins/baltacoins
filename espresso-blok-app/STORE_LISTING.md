@@ -10,43 +10,90 @@ Espresso Blok
 
 ## Kısa açıklama (max 80 karakter)
 ```
-Blokları doğru sırayla dizerek gerçek espresso tariflerini öğren!
+Barista oyunu: espresso, latte, cappuccino tariflerini bloklarla öğren!
 ```
-(66 karakter)
+(71 karakter — sürüm 1.2, 26 Kasım 2026)
 
 ## Tam açıklama (max 4000 karakter)
 ```
-Espresso Blok, gerçek barista tariflerini eğlenceli bir blok dizme
-oyunuyla öğreten bir kahve eğitim oyunudur.
+Espresso Blok, gerçek barista tariflerini blok dizme oyunuyla öğreten bir kahve eğitim oyunu. Espresso, süt, köpük, su ve süslemeyi doğru sırada ve doğru oranda üst üste koy; latte ile cappuccino arasındaki farkı ezberlemeden, oynayarak öğren.
 
 ☕ NASIL OYNANIR?
-Her tarif, doğru sırayla dizilmesi gereken renkli bloklardan oluşur.
-Espresso, süt, köpük, şurup ve daha fazlasını doğru oranda ve doğru
-sırada yerleştirerek gerçek kahve tariflerini adım adım öğren.
+Fişteki siparişi oku, blokları tabandan başlayarak sırayla ekle. Her blok bir malzeme; yüksekliği miktarını, sırası tarifi gösterir. İlk açılışta kısa bir tanıtım nasıl oynanacağını adım adım anlatır.
 
-🎯 ÖZELLİKLER
-• 37 gerçek kahve tarifi — Ristretto'dan Iced Mocha'ya, Cortado'dan
-  Eiskaffee'ye kadar klasik ve modern espresso bazlı içecekler
-• Kahveci → Barista → Gurme seviye sistemi — doğru tarif tamamladıkça
-  yeni içecekler ve zorluk seviyeleri açılır
-• Zamana Karşı Yarış modu — 60 saniyede kaç tarif tamamlayabileceğini
-  test et, en iyi skorunu geçmeye çalış
-• "Bu Ne?" tahmin modu — bloklara bakıp tarifi tahmin et
-• Kendi Tarifini Yap — özgür modda istediğin kombinasyonu dene ve kaydet
-• Rozet ve başarı sistemi
-• Her malzeme için gerçek oran ve ml bilgisi, her tarif için gerçekçi
-  bardak/fincan görseli
+📖 37 GERÇEK KAHVE TARİFİ
+Single ve double espresso, ristretto, lungo, americano, cortado, flat white, latte, cappuccino, latte macchiato, mocha, affogato ve buzlu kahveler… Her tarif baristaların kullandığı ölçülerle: kaç ml süt, kaç doz espresso, kaç kalori.
+
+🎮 OYUN MODLARI
+• Oyun: siparişi doğru kur, kombo yap, seviye atla
+• Cafe: istasyon seç, parçaya dokun, siparişi hazırla
+• Tarif Kitabı: tüm tarifleri katman katman incele
+• Bu Ne?: bloklara bak, içeceği tahmin et
+• Yarış: 60 saniyede kaç tarif kurabilirsin?
+• Kendi Tarifin: serbest modda kendi karışımını tasarla ve kaydet
+
+🏅 SEVİYELER VE ROZETLER
+Kahveci olarak başla, doğru tariflerle Barista'ya, oradan Gurme'ye yüksel. Rozetleri topla, kombo ve yarış rekorlarını kır.
+
+🌙 RAHAT KULLANIM
+• Açık, koyu ya da otomatik tema
+• Büyük yazılar ve dokunma alanları
+• Ayarlar'dan uygulamayı arkadaşlarınla paylaş, öneri ve hata bildirimlerini doğrudan bize gönder
 
 🎓 KİMLER İÇİN?
-Barista olmaya hazırlananlar, ev kahve meraklıları, ya da sadece
-espresso dünyasını eğlenceli bir şekilde keşfetmek isteyen herkes için.
+Barista olmaya hazırlananlar, kafe çalışanları ve eğitmenleri, ev barista ekipmanı alan kahve meraklıları ve espresso bazlı içecekleri eğlenceli bir şekilde öğrenmek isteyen herkes için.
 
-📴 İNTERNET GEREKTİRMEZ
-Oyun tamamen cihazında çalışır, internet bağlantısı gerekmez, reklam
-içermez, hiçbir kişisel veri toplamaz.
+📴 İNTERNET GEREKMEZ, REKLAM YOK
+Oyun tamamen cihazında çalışır. Reklam içermez, hesap istemez, kişisel veri toplamaz.
 
-Fincanını al, bloklara başla — gerçek bir barista gibi düşünmeyi öğren!
+Fincanını al, ilk bloğu koy — bir barista gibi düşünmeyi öğren!
 ```
+(1769 karakter)
+
+## İngilizce (en-US) çeviri — isteğe bağlı
+Kısa açıklama:
+```
+Barista game: learn espresso, latte & cappuccino recipes by stacking blocks
+```
+Tam açıklama:
+```
+Espresso Blok is a coffee education game that teaches real barista recipes by stacking blocks. Place espresso, milk, foam, water and toppings in the right order and the right amount, and learn the difference between a latte and a cappuccino by playing instead of memorising.
+
+☕ HOW TO PLAY
+Read the order, then add blocks from the bottom up. Each block is an ingredient: its height shows the amount and its position shows the recipe step. A short walkthrough on first launch shows you how it works.
+
+📖 37 REAL COFFEE RECIPES
+Single and double espresso, ristretto, lungo, americano, cortado, flat white, latte, cappuccino, latte macchiato, mocha, affogato and iced coffees, each with the measures baristas use: millilitres of milk, shots of espresso and calories.
+
+🎮 GAME MODES
+• Play: build the order, chain combos, level up
+• Cafe: pick a station and prepare the order
+• Recipe Book: explore every recipe layer by layer
+• What's This?: look at the blocks and guess the drink
+• Race: how many recipes can you build in 60 seconds?
+• Your Recipe: design and save your own mix
+
+🏅 LEVELS AND BADGES
+Start as a Coffee Maker, rise to Barista and then Gourmet. Collect badges and beat your combo and race records.
+
+🌙 COMFORTABLE TO USE
+Light, dark or automatic theme, large text and touch targets, and a Settings menu to share the app or send us feedback.
+
+📴 OFFLINE, NO ADS
+Runs entirely on your device. No ads, no account, no personal data collected.
+
+(The game's interface is in Turkish.)
+```
+(1484 karakter)
+
+## Ekran görüntüleri (sürüm 1.2)
+`store-assets/screenshots-1.2/` — 6 adet, 1080×1920, başlıklı özellik görselleri:
+1. Gerçek tarifleri bloklarla kur
+2. 37 tarif, gerçek ölçüler (Tarif Kitabı)
+3. Bu ne? Bak ve tahmin et
+4. 60 saniyede kaç tarif? (Yarış)
+5. Kahveci → Barista → Gurme (rozetler)
+6. Gece de rahat: koyu tema
 
 ## Kategori önerisi
 - Uygulama türü: **Oyun**
